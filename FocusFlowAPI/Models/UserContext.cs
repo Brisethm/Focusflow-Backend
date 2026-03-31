@@ -1,0 +1,24 @@
+using Microsoft.EntityFrameworkCore;
+
+namespace FocusFlowAPI.Models
+{
+    public class UsuarioContext : DbContext
+    {
+        public UsuarioContext(DbContextOptions<UsuarioContext> options) : base(options) { }
+
+        public DbSet<PerfilUsuario> PerfilUsuarios { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PerfilUsuario>().ToTable("perfil_usuario");
+        }
+
+        public DbSet<Tarea> Tareas { get; set; }
+        public DbSet<Recordatorio> Recordatorios { get; set; }
+        public DbSet<SesionEnfoque> SesionesEnfoque { get; set; }
+        public DbSet<RegistroEmocional> RegistrosEmocionales { get; set; }
+        public DbSet<Transaccion> Transacciones { get; set; }
+        public DbSet<Cuestionario> Cuestionarios { get; set; }
+        public DbSet<RespuestaCuestionario> RespuestasCuestionarios { get; set; }
+    }
+}
