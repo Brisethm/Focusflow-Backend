@@ -124,3 +124,5 @@ C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\FocusFlowAPI\bin\Deb
 C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\FocusFlowAPI\bin\Debug\net8.0\System.Reactive.dll
 C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\FocusFlowAPI\bin\Debug\net8.0\Websocket.Client.dll
 C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\FocusFlowAPI\obj\Debug\net8.0\FocusFlowAPI.sourcelink.json
+C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\FocusFlowAPI\bin\Debug\net8.0\DotNetEnv.dll
+C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\FocusFlowAPI\bin\Debug\net8.0\Sprache.dll

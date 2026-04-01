@@ -4,14 +4,21 @@ using FocusFlowAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using DotNetEnv;
 
 
 var builder = WebApplication.CreateBuilder(args);
-var jwtKey      = builder.Configuration["JWT_SECRET"];
-var jwtIssuer   = builder.Configuration["JWT_ISSUER"];
-var jwtAudience = builder.Configuration["JWT_AUDIENCE"] ?? "authenticated";
-var dbConn      = builder.Configuration["DATABASE_URL"];
+DotNetEnv.Env.Load();
+// Primero carga appsettings y variables de entorno
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddEnvironmentVariables();
 
+// Ahora sí puedes leerlas
+var jwtKey      = builder.Configuration["Jwt:Key"];
+var jwtIssuer   = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "authenticated";
+var dbConn      = builder.Configuration.GetConnectionString("SupabaseDb");
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -71,4 +78,3 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 await app.RunAsync();
-

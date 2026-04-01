@@ -61,6 +61,41 @@ namespace FocusFlowAPI.Controllers
 
             return Ok(new { token = response.AccessToken, userId = response.User.Id });
         }
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+        {
+            var success = await _supabase.Auth.ResetPasswordForEmail(dto.Email);
+
+            if (!success)
+                return BadRequest("No se pudo enviar el correo de restablecimiento.");
+
+            return Ok(new { message = "Correo de restablecimiento enviado" });
+        }
+
+        public class ResetPasswordDto
+        {
+            public required string Email { get; set; }
+        }
+
+        [HttpPost("update-password")]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDto dto)
+        {
+            var user = await _supabase.Auth.Update(new Supabase.Gotrue.UserAttributes
+            {
+                Password = dto.NewPassword
+            });
+
+            if (user == null)
+                return BadRequest("No se pudo actualizar la contraseña.");
+
+            return Ok(new { message = "Contraseña actualizada correctamente" });
+        }
+
+        public class UpdatePasswordDto
+        {
+            public required string NewPassword { get; set; }
+        }
+
 
     }
 }
