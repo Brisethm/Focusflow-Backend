@@ -17,11 +17,11 @@ namespace FocusFlowAPI.Controllers
         {
             _context = context;
 
-            var supabaseUrl = config["SUPABASE_URL"];
-            var supabaseKey = config["SUPABASE_KEY"];
+            var supabaseUrl = config["Supabase:Url"];
+            var supabaseKey = config["Supabase:AnonKey"];
 
             if (string.IsNullOrEmpty(supabaseUrl) || string.IsNullOrEmpty(supabaseKey))
-                throw new InvalidOperationException("Las variables SUPABASE_URL o SUPABASE_KEY no están configuradas.");
+                throw new InvalidOperationException("Las variables SUPABASE_URL o SUPABASE_ANON_KEY no están configuradas.");
 
             _supabase = new Supabase.Client(
                 supabaseUrl,
