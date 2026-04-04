@@ -21,14 +21,14 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(IEnumerable<RegistroEmocionalDto>), StatusCodes.Status200OK)]
         public IActionResult GetRegistros()
         {
-            var claim = User.FindFirst("id_usuario");
+            var claim = User.FindFirst("sub");
             if (claim == null)
             {
-                return Unauthorized("El token no contiene el claim 'id_usuario'.");
+                return Unauthorized("El token no contiene el claim 'sub'.");
             }
 
-            var idUsuario = Guid.Parse(claim.Value);
-            var registros = _service.ObtenerRegistros(idUsuario);
+            var sub = Guid.Parse(claim.Value);
+            var registros = _service.ObtenerRegistros(sub);
             return Ok(registros);
         }
 
@@ -36,14 +36,14 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(RegistroEmocionalDto), StatusCodes.Status200OK)]
         public IActionResult CrearRegistro([FromBody] RegistroEmocionalDto dto)
         {
-            var claim = User.FindFirst("id_usuario");
+            var claim = User.FindFirst("sub");
             if (claim == null)
             {
-                return Unauthorized("El token no contiene el claim 'id_usuario'.");
+                return Unauthorized("El token no contiene el claim 'sub'.");
             }
 
-            var idUsuario = Guid.Parse(claim.Value);
-            var registro = _service.CrearRegistro(idUsuario, dto);
+            var sub = Guid.Parse(claim.Value);
+            var registro = _service.CrearRegistro(sub, dto);
             return Ok(registro);
         }
 

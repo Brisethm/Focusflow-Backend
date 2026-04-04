@@ -7914,25 +7914,25 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\bsofi\\.nuget\\packages\\": {}
+    "C:\\Users\\BrisethSofíaMarínMos\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\bsofi\\Documents\\Focusflow-Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
+      "projectUniqueName": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
       "projectName": "FocusFlowAPI",
-      "projectPath": "C:\\Users\\bsofi\\Documents\\Focusflow-Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
-      "packagesPath": "C:\\Users\\bsofi\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\bsofi\\Documents\\Focusflow-Backend\\FocusFlowAPI\\obj\\",
+      "projectPath": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
+      "packagesPath": "C:\\Users\\BrisethSofíaMarínMos\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\bsofi\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\BrisethSofíaMarínMos\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
-        "https://www.nuget.org/api/v2/": {}
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
@@ -8009,7 +8009,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.419/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.415/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

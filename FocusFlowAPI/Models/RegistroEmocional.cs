@@ -11,7 +11,6 @@ namespace FocusFlowAPI.Models
         [Required]
         public Guid IdUsuario { get; set; }
 
-        [Required]
         [MaxLength(100)]
         public required string  EstadoAnimo { get; set; }
 

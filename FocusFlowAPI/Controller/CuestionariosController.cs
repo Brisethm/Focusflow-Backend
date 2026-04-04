@@ -21,10 +21,10 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(IEnumerable<CuestionarioDto>), StatusCodes.Status200OK)]
         public IActionResult GetCuestionarios()
         {
-            var claim = User.FindFirst("id_usuario");
+            var claim = User.FindFirst("sub");
             if (claim == null)
             {
-                return Unauthorized("El token no contiene el claim 'id_usuario'.");
+                return Unauthorized("El token no contiene el claim 'sub'.");
             }
 
             var idUsuario = Guid.Parse(claim.Value);
@@ -37,10 +37,10 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(CuestionarioDto), StatusCodes.Status200OK)]
         public IActionResult CrearCuestionario([FromBody] CuestionarioDto dto)
         {
-            var claim = User.FindFirst("id_usuario");
+            var claim = User.FindFirst("sub");
             if (claim == null)
             {
-                return Unauthorized("El token no contiene el claim 'id_usuario'.");
+                return Unauthorized("El token no contiene el claim 'sub'.");
             }
 
             var idUsuario = Guid.Parse(claim.Value);

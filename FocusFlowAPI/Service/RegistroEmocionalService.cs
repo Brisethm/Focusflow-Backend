@@ -12,16 +12,16 @@ namespace FocusFlowAPI.Services
             _context = context;
         }
 
-        public IEnumerable<RegistroEmocional> ObtenerRegistros(Guid idUsuario)
+        public IEnumerable<RegistroEmocional> ObtenerRegistros(Guid sub)
         {
-            return _context.RegistrosEmocionales.Where(r => r.IdUsuario == idUsuario).ToList();
+            return _context.RegistrosEmocionales.Where(r => r.IdUsuario == sub).ToList();
         }
 
-        public RegistroEmocional CrearRegistro(Guid idUsuario, RegistroEmocionalDto dto)
+        public RegistroEmocional CrearRegistro(Guid sub, RegistroEmocionalDto dto)
         {
             var registro = new RegistroEmocional
             {
-                IdUsuario = idUsuario,
+                IdUsuario = sub,
                 EstadoAnimo = dto.EstadoAnimo,
                 NivelEnergia = dto.NivelEnergia,
                 NotaOpcional = dto.NotaOpcional,
