@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FocusFlowAPI.Services;
 using FocusFlowAPI.DTOs;
+using FocusFlowAPI.Extensions;
 
 namespace FocusFlowAPI.Controllers
 {
@@ -21,14 +22,13 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(IEnumerable<RecordatorioDto>), StatusCodes.Status200OK)]
         public IActionResult GetRecordatorios()
         {
-            var claim = User.FindFirst("id_usuario");
-            if (claim == null)
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene el claim 'id_usuario'.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
-            var idUsuario = Guid.Parse(claim.Value);
-            var recordatorios = _service.ObtenerRecordatorios(idUsuario);
+            var recordatorios = _service.ObtenerRecordatorios(idUsuario.Value);
             return Ok(recordatorios);
         }
 
@@ -36,14 +36,13 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(RecordatorioDto), StatusCodes.Status200OK)]
         public IActionResult CrearRecordatorio([FromBody] RecordatorioDto dto)
         {
-            var claim = User.FindFirst("id_usuario");
-            if (claim == null)
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene el claim 'id_usuario'.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
-            var idUsuario = Guid.Parse(claim.Value);
-            var recordatorio = _service.CrearRecordatorio(idUsuario, dto);
+            var recordatorio = _service.CrearRecordatorio(idUsuario.Value, dto);
             return Ok(recordatorio);
         }
     }

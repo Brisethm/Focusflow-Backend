@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FocusFlowAPI.Services;
 using FocusFlowAPI.DTOs;
+using FocusFlowAPI.Extensions;
 
 namespace FocusFlowAPI.Controllers
 {
@@ -21,14 +22,13 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(IEnumerable<RegistroEmocionalDto>), StatusCodes.Status200OK)]
         public IActionResult GetRegistros()
         {
-            var claim = User.FindFirst("sub");
-            if (claim == null)
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene el claim 'sub'.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
-            var sub = Guid.Parse(claim.Value);
-            var registros = _service.ObtenerRegistros(sub);
+            var registros = _service.ObtenerRegistros(idUsuario.Value);
             return Ok(registros);
         }
 
@@ -36,14 +36,13 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(RegistroEmocionalDto), StatusCodes.Status200OK)]
         public IActionResult CrearRegistro([FromBody] RegistroEmocionalDto dto)
         {
-            var claim = User.FindFirst("sub");
-            if (claim == null)
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene el claim 'sub'.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
-            var sub = Guid.Parse(claim.Value);
-            var registro = _service.CrearRegistro(sub, dto);
+            var registro = _service.CrearRegistro(idUsuario.Value, dto);
             return Ok(registro);
         }
 

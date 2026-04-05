@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FocusFlowAPI.Services;
 using FocusFlowAPI.DTOs;
+using FocusFlowAPI.Extensions;
 
 namespace FocusFlowAPI.Controllers
 {
@@ -21,14 +22,13 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(IEnumerable<TransaccionDto>), StatusCodes.Status200OK)]
         public IActionResult GetTransacciones()
         {
-            var claim = User.FindFirst("id_usuario");
-            if (claim == null)
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene el claim 'id_usuario'.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
-            var idUsuario = Guid.Parse(claim.Value);
-            var transacciones = _service.ObtenerTransacciones(idUsuario);
+            var transacciones = _service.ObtenerTransacciones(idUsuario.Value);
             return Ok(transacciones);
         }
 
@@ -36,14 +36,13 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(TransaccionDto), StatusCodes.Status200OK)]
         public IActionResult CrearTransaccion([FromBody] TransaccionDto dto)
         {
-            var claim = User.FindFirst("id_usuario");
-            if (claim == null)
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene el claim 'id_usuario'.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
-            var idUsuario = Guid.Parse(claim.Value);
-            var transaccion = _service.CrearTransaccion(idUsuario, dto);
+            var transaccion = _service.CrearTransaccion(idUsuario.Value, dto);
             return Ok(transaccion);
         }
 

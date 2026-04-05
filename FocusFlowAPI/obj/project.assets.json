@@ -51,25 +51,6 @@
           "Microsoft.AspNetCore.App"
         ]
       },
-      "Microsoft.AspNetCore.OpenApi/8.0.21": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.OpenApi": "1.4.3"
-        },
-        "compile": {
-          "lib/net8.0/Microsoft.AspNetCore.OpenApi.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net8.0/Microsoft.AspNetCore.OpenApi.dll": {
-            "related": ".xml"
-          }
-        },
-        "frameworkReferences": [
-          "Microsoft.AspNetCore.App"
-        ]
-      },
       "Microsoft.Bcl.AsyncInterfaces/6.0.0": {
         "type": "package",
         "compile": {
@@ -1225,13 +1206,13 @@
           }
         }
       },
-      "Swashbuckle.AspNetCore/10.1.5": {
+      "Swashbuckle.AspNetCore/10.1.7": {
         "type": "package",
         "dependencies": {
           "Microsoft.Extensions.ApiDescription.Server": "8.0.0",
-          "Swashbuckle.AspNetCore.Swagger": "10.1.5",
-          "Swashbuckle.AspNetCore.SwaggerGen": "10.1.5",
-          "Swashbuckle.AspNetCore.SwaggerUI": "10.1.5"
+          "Swashbuckle.AspNetCore.Swagger": "10.1.7",
+          "Swashbuckle.AspNetCore.SwaggerGen": "10.1.7",
+          "Swashbuckle.AspNetCore.SwaggerUI": "10.1.7"
         },
         "build": {
           "build/Swashbuckle.AspNetCore.props": {}
@@ -1240,7 +1221,7 @@
           "buildMultiTargeting/Swashbuckle.AspNetCore.props": {}
         }
       },
-      "Swashbuckle.AspNetCore.Swagger/10.1.5": {
+      "Swashbuckle.AspNetCore.Swagger/10.1.7": {
         "type": "package",
         "dependencies": {
           "Microsoft.OpenApi": "2.4.1"
@@ -1259,10 +1240,10 @@
           "Microsoft.AspNetCore.App"
         ]
       },
-      "Swashbuckle.AspNetCore.SwaggerGen/10.1.5": {
+      "Swashbuckle.AspNetCore.SwaggerGen/10.1.7": {
         "type": "package",
         "dependencies": {
-          "Swashbuckle.AspNetCore.Swagger": "10.1.5"
+          "Swashbuckle.AspNetCore.Swagger": "10.1.7"
         },
         "compile": {
           "lib/net8.0/Swashbuckle.AspNetCore.SwaggerGen.dll": {
@@ -1275,7 +1256,7 @@
           }
         }
       },
-      "Swashbuckle.AspNetCore.SwaggerUI/10.1.5": {
+      "Swashbuckle.AspNetCore.SwaggerUI/10.1.7": {
         "type": "package",
         "compile": {
           "lib/net8.0/Swashbuckle.AspNetCore.SwaggerUI.dll": {
@@ -2694,21 +2675,6 @@
         "lib/net8.0/Microsoft.AspNetCore.Authentication.JwtBearer.xml",
         "microsoft.aspnetcore.authentication.jwtbearer.8.0.0.nupkg.sha512",
         "microsoft.aspnetcore.authentication.jwtbearer.nuspec"
-      ]
-    },
-    "Microsoft.AspNetCore.OpenApi/8.0.21": {
-      "sha512": "nSr56STDye1O3zp3MaFpJCjtHkNzcZ39QxevWmevEraoglplXP7G4MS4OgE3J1TxfXg+7x3Ii/tRiQv1MpNc6Q==",
-      "type": "package",
-      "path": "microsoft.aspnetcore.openapi/8.0.21",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net8.0/Microsoft.AspNetCore.OpenApi.dll",
-        "lib/net8.0/Microsoft.AspNetCore.OpenApi.xml",
-        "microsoft.aspnetcore.openapi.8.0.21.nupkg.sha512",
-        "microsoft.aspnetcore.openapi.nuspec"
       ]
     },
     "Microsoft.Bcl.AsyncInterfaces/6.0.0": {
@@ -4384,24 +4350,24 @@
         "supabase.storage.nuspec"
       ]
     },
-    "Swashbuckle.AspNetCore/10.1.5": {
-      "sha512": "/eNk9z/8quXhDX14o3XLbwAX/84uIWSbiUD7cI/UrQnoBMOiyAtzKxNEJUtf/TyxjFpcXxE9FAfLvtbNpxHBSg==",
+    "Swashbuckle.AspNetCore/10.1.7": {
+      "sha512": "vgef8DPT411JU5JjHiDbr0WOxsIVuAvegPGtqmm4Na4JRl/264dfBJcGkiPHsAr5P+Vda+qN1rZKRtBl1rF9aA==",
       "type": "package",
-      "path": "swashbuckle.aspnetcore/10.1.5",
+      "path": "swashbuckle.aspnetcore/10.1.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "build/Swashbuckle.AspNetCore.props",
         "buildMultiTargeting/Swashbuckle.AspNetCore.props",
         "docs/package-readme.md",
-        "swashbuckle.aspnetcore.10.1.5.nupkg.sha512",
+        "swashbuckle.aspnetcore.10.1.7.nupkg.sha512",
         "swashbuckle.aspnetcore.nuspec"
       ]
     },
-    "Swashbuckle.AspNetCore.Swagger/10.1.5": {
-      "sha512": "s4Mct6+Ob0LK9vYVaZcYi/RFFCOEJNjf6nJ5ZPoxtpdFSlzR6i9AHI7Vl44obX8cynRxJW7prA1IUabkiXolFg==",
+    "Swashbuckle.AspNetCore.Swagger/10.1.7": {
+      "sha512": "EjLibt/d/QuRv170GoihTbcPUpgzSFm2WKHhnGJFZQ03JYzfuitsM79azaAR8NBwRunU7yScSX6HRE5JUlrEMQ==",
       "type": "package",
-      "path": "swashbuckle.aspnetcore.swagger/10.1.5",
+      "path": "swashbuckle.aspnetcore.swagger/10.1.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -4415,14 +4381,14 @@
         "lib/net9.0/Swashbuckle.AspNetCore.Swagger.pdb",
         "lib/net9.0/Swashbuckle.AspNetCore.Swagger.xml",
         "package-readme.md",
-        "swashbuckle.aspnetcore.swagger.10.1.5.nupkg.sha512",
+        "swashbuckle.aspnetcore.swagger.10.1.7.nupkg.sha512",
         "swashbuckle.aspnetcore.swagger.nuspec"
       ]
     },
-    "Swashbuckle.AspNetCore.SwaggerGen/10.1.5": {
-      "sha512": "ysQIRgqnx4Vb/9+r3xnEAiaxYmiBHO8jTg7ACaCh+R3Sn+ZKCWKD6nyu0ph3okP91wFSh/6LgccjeLUaQHV+ZA==",
+    "Swashbuckle.AspNetCore.SwaggerGen/10.1.7": {
+      "sha512": "PuubO9BjvNn6U3D9kLpuWKY1JtziWw7SsGBq0age1E50uQjQ8Fzl8s0EwzrLfANqYJNgDnJi9l7N1QxcGVB2Zw==",
       "type": "package",
-      "path": "swashbuckle.aspnetcore.swaggergen/10.1.5",
+      "path": "swashbuckle.aspnetcore.swaggergen/10.1.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -4436,14 +4402,14 @@
         "lib/net9.0/Swashbuckle.AspNetCore.SwaggerGen.pdb",
         "lib/net9.0/Swashbuckle.AspNetCore.SwaggerGen.xml",
         "package-readme.md",
-        "swashbuckle.aspnetcore.swaggergen.10.1.5.nupkg.sha512",
+        "swashbuckle.aspnetcore.swaggergen.10.1.7.nupkg.sha512",
         "swashbuckle.aspnetcore.swaggergen.nuspec"
       ]
     },
-    "Swashbuckle.AspNetCore.SwaggerUI/10.1.5": {
-      "sha512": "tQWVKNJWW7lf6S0bv22+7yfxK5IKzvsMeueF4XHSziBfREhLKt42OKzi6/1nINmyGlM4hGbR8aSMg72dLLVBLw==",
+    "Swashbuckle.AspNetCore.SwaggerUI/10.1.7": {
+      "sha512": "iJo3ODyUb/M8Vm8AH1r9y9iAba0w95xsCn3zFVl96ISRHbTDWxi+l7oFVCZqUEdjd97B8VMDPnMliWAdomR8uw==",
       "type": "package",
-      "path": "swashbuckle.aspnetcore.swaggerui/10.1.5",
+      "path": "swashbuckle.aspnetcore.swaggerui/10.1.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -4457,7 +4423,7 @@
         "lib/net9.0/Swashbuckle.AspNetCore.SwaggerUI.pdb",
         "lib/net9.0/Swashbuckle.AspNetCore.SwaggerUI.xml",
         "package-readme.md",
-        "swashbuckle.aspnetcore.swaggerui.10.1.5.nupkg.sha512",
+        "swashbuckle.aspnetcore.swaggerui.10.1.7.nupkg.sha512",
         "swashbuckle.aspnetcore.swaggerui.nuspec"
       ]
     },
@@ -7905,16 +7871,15 @@
     "net8.0": [
       "DotNetEnv >= 3.1.1",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.0",
-      "Microsoft.AspNetCore.OpenApi >= 8.0.21",
       "Microsoft.EntityFrameworkCore.Design >= 8.0.0",
       "Npgsql.EntityFrameworkCore.PostgreSQL >= 8.0.0",
       "Supabase >= 1.1.1",
       "Supabase.Gotrue >= 6.0.3",
-      "Swashbuckle.AspNetCore >= 10.1.5"
+      "Swashbuckle.AspNetCore >= 10.1.7"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\BrisethSofíaMarínMos\\.nuget\\packages\\": {}
+    "C:\\Users\\BrisethSof�aMar�nMos\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
@@ -7922,11 +7887,12 @@
       "projectUniqueName": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
       "projectName": "FocusFlowAPI",
       "projectPath": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
-      "packagesPath": "C:\\Users\\BrisethSofíaMarínMos\\.nuget\\packages\\",
+      "packagesPath": "C:\\Users\\BrisethSof�aMar�nMos\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\BrisethSofíaMarínMos\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\NuGet.Config",
+        "C:\\Users\\BrisethSof�aMar�nMos\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -7963,10 +7929,6 @@
             "target": "Package",
             "version": "[8.0.0, )"
           },
-          "Microsoft.AspNetCore.OpenApi": {
-            "target": "Package",
-            "version": "[8.0.21, )"
-          },
           "Microsoft.EntityFrameworkCore.Design": {
             "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
             "suppressParent": "All",
@@ -7987,7 +7949,7 @@
           },
           "Swashbuckle.AspNetCore": {
             "target": "Package",
-            "version": "[10.1.5, )"
+            "version": "[10.1.7, )"
           }
         },
         "imports": [

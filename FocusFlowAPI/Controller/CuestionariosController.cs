@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FocusFlowAPI.Services;
 using FocusFlowAPI.DTOs;
+using FocusFlowAPI.Extensions;
 
 namespace FocusFlowAPI.Controllers
 {
@@ -21,14 +22,13 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(IEnumerable<CuestionarioDto>), StatusCodes.Status200OK)]
         public IActionResult GetCuestionarios()
         {
-            var claim = User.FindFirst("sub");
-            if (claim == null)
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene el claim 'sub'.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
-            var idUsuario = Guid.Parse(claim.Value);
-            var cuestionarios = _service.ObtenerCuestionarios(idUsuario);
+            var cuestionarios = _service.ObtenerCuestionarios(idUsuario.Value);
             return Ok(cuestionarios);
         }
 
@@ -37,14 +37,13 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(CuestionarioDto), StatusCodes.Status200OK)]
         public IActionResult CrearCuestionario([FromBody] CuestionarioDto dto)
         {
-            var claim = User.FindFirst("sub");
-            if (claim == null)
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene el claim 'sub'.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
-            var idUsuario = Guid.Parse(claim.Value);
-            var cuestionario = _service.CrearCuestionario(idUsuario, dto);
+            var cuestionario = _service.CrearCuestionario(idUsuario.Value, dto);
             return Ok(cuestionario);
         }
     }

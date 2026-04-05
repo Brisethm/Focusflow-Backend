@@ -10,11 +10,12 @@
         "projectUniqueName": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
         "projectName": "FocusFlowAPI",
         "projectPath": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
-        "packagesPath": "C:\\Users\\BrisethSofíaMarínMos\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\BrisethSof�aMar�nMos\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\BrisethSofíaMarínMos\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\NuGet.Config",
+          "C:\\Users\\BrisethSof�aMar�nMos\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -51,10 +52,6 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
-            "Microsoft.AspNetCore.OpenApi": {
-              "target": "Package",
-              "version": "[8.0.21, )"
-            },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
@@ -75,7 +72,7 @@
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[10.1.5, )"
+              "version": "[10.1.7, )"
             }
           },
           "imports": [

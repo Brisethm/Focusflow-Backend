@@ -3,22 +3,20 @@ using FocusFlowAPI.Models;
 using FocusFlowAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using DotNetEnv;
-
 
 var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
+
 // Primero carga appsettings y variables de entorno
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-// Ahora sí puedes leerlas
-var jwtKey      = builder.Configuration["Jwt:Key"];
-var jwtIssuer   = builder.Configuration["Jwt:Issuer"];
+// Variables de entorno
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "authenticated";
-var dbConn      = builder.Configuration.GetConnectionString("SupabaseDb");
+var dbConn = builder.Configuration.GetConnectionString("SupabaseDb");
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -36,25 +34,45 @@ builder.Services.AddDbContext<UsuarioContext>(options =>
     options.UseNpgsql(dbConn, npgsqlOptions => npgsqlOptions.CommandTimeout(180))
 );
 
-if (string.IsNullOrEmpty(jwtKey))
-{
-    throw new InvalidOperationException("La clave JWT no está configurada en variables de entorno");
-}
-
+// Configuración de autenticación con Supabase (ES256 + JWKS)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = ctx =>
+            {
+                Console.WriteLine($"Auth failed: {ctx.Exception}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = ctx =>
+            {
+                Console.WriteLine("Token validado correctamente");
+                return Task.CompletedTask;
+            }
+        };
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
             ValidateAudience = true,
+            ValidAudience = jwtAudience,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtIssuer,
-            ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
+            {
+                using var client = new HttpClient();
+                var jwks = client.GetStringAsync($"{jwtIssuer}/.well-known/jwks.json").Result;
+                var keys = new JsonWebKeySet(jwks);
+                return keys.Keys;
+            },
+            // 👇 Esto asegura que ASP.NET use directamente el claim "sub" y "role"
+            NameClaimType = "sub",
+            RoleClaimType = "role"
         };
     });
+
 
 builder.Services.AddScoped<TareaService>();
 builder.Services.AddScoped<RecordatorioService>();

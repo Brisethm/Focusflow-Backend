@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FocusFlowAPI.Services;
 using FocusFlowAPI.DTOs;
+using FocusFlowAPI.Extensions;
 
 namespace FocusFlowAPI.Controllers
 {
@@ -21,14 +22,13 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(IEnumerable<SesionEnfoqueDto>), StatusCodes.Status200OK)]
         public IActionResult GetSesiones()
         {
-            var claim = User.FindFirst("id_usuario");
-            if (claim == null)
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene el claim 'id_usuario'.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
-            var idUsuario = Guid.Parse(claim.Value);
-            var sesiones = _service.ObtenerSesiones(idUsuario);
+            var sesiones = _service.ObtenerSesiones(idUsuario.Value);
             return Ok(sesiones);
         }
 
@@ -36,14 +36,13 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(SesionEnfoqueDto), StatusCodes.Status200OK)]
         public IActionResult CrearSesion([FromBody] SesionEnfoqueDto dto)
         {
-            var claim = User.FindFirst("id_usuario");
-            if (claim == null)
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene el claim 'id_usuario'.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
-            var idUsuario = Guid.Parse(claim.Value);
-            var sesion = _service.CrearSesion(idUsuario, dto);
+            var sesion = _service.CrearSesion(idUsuario.Value, dto);
             return Ok(sesion);
         }
 

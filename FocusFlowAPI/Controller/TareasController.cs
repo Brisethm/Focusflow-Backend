@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FocusFlowAPI.Services;
 using FocusFlowAPI.DTOs;
+using FocusFlowAPI.Extensions;
 
 namespace FocusFlowAPI.Controllers
 {
@@ -21,14 +22,13 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(IEnumerable<TareaDto>), StatusCodes.Status200OK)]
         public IActionResult GetTareas()
         {
-            var claim = User.FindFirst("id_usuario");
-            if (claim == null)
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene el claim 'id_usuario'.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
-            var idUsuario = Guid.Parse(claim.Value);
-            var tareas = _service.ObtenerTareas(idUsuario);
+            var tareas = _service.ObtenerTareas(idUsuario.Value);
             return Ok(tareas);
         }
 
@@ -36,14 +36,13 @@ namespace FocusFlowAPI.Controllers
         [ProducesResponseType(typeof(TareaDto), StatusCodes.Status200OK)]
         public IActionResult CrearTarea([FromBody] TareaDto dto)
         {
-            var claim = User.FindFirst("id_usuario");
-            if (claim == null)
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene el claim 'id_usuario'.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
-            var idUsuario = Guid.Parse(claim.Value);
-            var tarea = _service.CrearTarea(idUsuario, dto);
+            var tarea = _service.CrearTarea(idUsuario.Value, dto);
             return Ok(tarea);
         }
 
