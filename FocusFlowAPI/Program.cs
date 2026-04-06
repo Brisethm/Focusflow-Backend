@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using FocusFlowAPI.Models;
+using FocusFlowAPI.Security;
 using FocusFlowAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -17,10 +18,12 @@ builder.Configuration
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "authenticated";
 var dbConn = builder.Configuration.GetConnectionString("SupabaseDb");
+var jwksCache = new SupabaseJwksCache($"{jwtIssuer}/.well-known/jwks.json");
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
+builder.Services.AddSingleton(jwksCache);
 
 builder.Services.AddCors(options =>
 {
@@ -62,12 +65,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
             {
-                using var client = new HttpClient();
-                var jwks = client.GetStringAsync($"{jwtIssuer}/.well-known/jwks.json").Result;
-                var keys = new JsonWebKeySet(jwks);
-                return keys.Keys;
+                return jwksCache.GetSigningKeys(kid);
             },
-            // 👇 Esto asegura que ASP.NET use directamente el claim "sub" y "role"
+            // Esto asegura que ASP.NET use directamente el claim "sub" y "role"
             NameClaimType = "sub",
             RoleClaimType = "role"
         };

@@ -19,32 +19,31 @@ namespace FocusFlowAPI.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<RegistroEmocionalDto>), StatusCodes.Status200OK)]
-        public IActionResult GetRegistros()
+        [ProducesResponseType(typeof(IEnumerable<RegistroEmocionalResponseDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetRegistros()
         {
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene un identificador de usuario válido.");
+                return Unauthorized("El token no contiene un identificador de usuario valido.");
             }
 
-            var registros = _service.ObtenerRegistros(idUsuario.Value);
+            var registros = await _service.ObtenerRegistrosAsync(idUsuario.Value);
             return Ok(registros);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(RegistroEmocionalDto), StatusCodes.Status200OK)]
-        public IActionResult CrearRegistro([FromBody] RegistroEmocionalDto dto)
+        [ProducesResponseType(typeof(RegistroEmocionalResponseDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CrearRegistro([FromBody] RegistroEmocionalDto dto)
         {
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene un identificador de usuario válido.");
+                return Unauthorized("El token no contiene un identificador de usuario valido.");
             }
 
-            var registro = _service.CrearRegistro(idUsuario.Value, dto);
+            var registro = await _service.CrearRegistroAsync(idUsuario.Value, dto);
             return Ok(registro);
         }
-
     }
 }

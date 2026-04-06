@@ -1,5 +1,6 @@
 using FocusFlowAPI.Models;
 using FocusFlowAPI.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace FocusFlowAPI.Services
 {
@@ -12,26 +13,47 @@ namespace FocusFlowAPI.Services
             _context = context;
         }
 
-        public IEnumerable<RegistroEmocional> ObtenerRegistros(Guid sub)
+        public async Task<IEnumerable<RegistroEmocionalResponseDto>> ObtenerRegistrosAsync(Guid sub)
         {
-            return _context.RegistrosEmocionales.Where(r => r.IdUsuario == sub).ToList();
+            return await _context.RegistrosEmocionales
+                .AsNoTracking()
+                .Where(r => r.IdUsuario == sub)
+                .OrderByDescending(r => r.Fecha)
+                .Select(r => new RegistroEmocionalResponseDto
+                {
+                    IdRegistro = r.IdRegistro,
+                    IdUsuario = r.IdUsuario,
+                    EstadoAnimo = r.EstadoAnimo,
+                    NivelEnergia = r.NivelEnergia,
+                    NotaOpcional = r.NotaOpcional,
+                    Fecha = r.Fecha
+                })
+                .ToListAsync();
         }
 
-        public RegistroEmocional CrearRegistro(Guid sub, RegistroEmocionalDto dto)
+        public async Task<RegistroEmocionalResponseDto> CrearRegistroAsync(Guid sub, RegistroEmocionalDto dto)
         {
             var registro = new RegistroEmocional
             {
                 IdUsuario = sub,
-                EstadoAnimo = dto.EstadoAnimo,
+                EstadoAnimo = dto.EstadoAnimo ?? string.Empty,
                 NivelEnergia = dto.NivelEnergia,
                 NotaOpcional = dto.NotaOpcional,
                 Fecha = DateTime.UtcNow
             };
 
             _context.RegistrosEmocionales.Add(registro);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return registro;
+            return new RegistroEmocionalResponseDto
+            {
+                IdRegistro = registro.IdRegistro,
+                IdUsuario = registro.IdUsuario,
+                EstadoAnimo = registro.EstadoAnimo,
+                NivelEnergia = registro.NivelEnergia,
+                NotaOpcional = registro.NotaOpcional,
+                Fecha = registro.Fecha
+            };
         }
     }
 }

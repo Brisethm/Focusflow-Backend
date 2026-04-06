@@ -7879,7 +7879,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\BrisethSof�aMar�nMos\\.nuget\\packages\\": {}
+    "C:\\Users\\BrisethSofíaMarínMos\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
@@ -7887,12 +7887,12 @@
       "projectUniqueName": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
       "projectName": "FocusFlowAPI",
       "projectPath": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
-      "packagesPath": "C:\\Users\\BrisethSof�aMar�nMos\\.nuget\\packages\\",
+      "packagesPath": "C:\\Users\\BrisethSofíaMarínMos\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\NuGet.Config",
-        "C:\\Users\\BrisethSof�aMar�nMos\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\BrisethSofíaMarínMos\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"

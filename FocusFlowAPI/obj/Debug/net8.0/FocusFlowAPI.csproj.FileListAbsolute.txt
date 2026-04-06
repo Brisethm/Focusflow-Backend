@@ -260,3 +260,10 @@ C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\build-verify\FocusFl
 C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\build-verify\FocusFlowAPI.runtimeconfig.json
 C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\build-verify\FocusFlowAPI.dll
 C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\build-verify\FocusFlowAPI.pdb
+C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\build-verify\focusflowapi-check\appsettings.Development.json
+C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\build-verify\focusflowapi-check\appsettings.json
+C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\build-verify\focusflowapi-check\FocusFlowAPI.exe
+C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\build-verify\focusflowapi-check\FocusFlowAPI.deps.json
+C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\build-verify\focusflowapi-check\FocusFlowAPI.runtimeconfig.json
+C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\build-verify\focusflowapi-check\FocusFlowAPI.dll
+C:\Users\BrisethSofíaMarínMos\Documents\Focusflow Backend\build-verify\focusflowapi-check\FocusFlowAPI.pdb
