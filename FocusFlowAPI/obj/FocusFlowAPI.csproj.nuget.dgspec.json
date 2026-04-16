@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\FocusFlowAPI.csproj": {}
+    "C:\\Users\\BrisethSofíaMarínMos\\Desktop\\Focusflow-Backend\\FocusFLowAPI\\FocusFlowAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\FocusFlowAPI.csproj": {
+    "C:\\Users\\BrisethSofíaMarínMos\\Desktop\\Focusflow-Backend\\FocusFLowAPI\\FocusFlowAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
+        "projectUniqueName": "C:\\Users\\BrisethSofíaMarínMos\\Desktop\\Focusflow-Backend\\FocusFLowAPI\\FocusFlowAPI.csproj",
         "projectName": "FocusFlowAPI",
-        "projectPath": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
+        "projectPath": "C:\\Users\\BrisethSofíaMarínMos\\Desktop\\Focusflow-Backend\\FocusFLowAPI\\FocusFlowAPI.csproj",
         "packagesPath": "C:\\Users\\BrisethSofíaMarínMos\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\FocusFlowAPI\\obj\\",
+        "outputPath": "C:\\Users\\BrisethSofíaMarínMos\\Desktop\\Focusflow-Backend\\FocusFLowAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\BrisethSofíaMarínMos\\Documents\\Focusflow Backend\\NuGet.Config",
+          "C:\\Users\\BrisethSofíaMarínMos\\Desktop\\Focusflow-Backend\\NuGet.Config",
           "C:\\Users\\BrisethSofíaMarínMos\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [

@@ -1,5 +1,6 @@
-using FocusFlowAPI.Models;
 using FocusFlowAPI.DTOs;
+using FocusFlowAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FocusFlowAPI.Services
 {
@@ -12,12 +13,26 @@ namespace FocusFlowAPI.Services
             _context = context;
         }
 
-        public IEnumerable<Transaccion> ObtenerTransacciones(Guid idUsuario)
+        public async Task<IEnumerable<TransaccionDto>> ObtenerTransaccionesAsync(Guid idUsuario)
         {
-            return _context.Transacciones.Where(t => t.IdUsuario == idUsuario).ToList();
+            return await _context.Transacciones
+                .AsNoTracking()
+                .Where(t => t.IdUsuario == idUsuario)
+                .OrderByDescending(t => t.Fecha)
+                .Select(t => MapToDto(t))
+                .ToListAsync();
         }
 
-        public Transaccion CrearTransaccion(Guid idUsuario, TransaccionDto dto)
+        public async Task<TransaccionDto?> ObtenerTransaccionPorIdAsync(Guid idUsuario, int idTransaccion)
+        {
+            var transaccion = await _context.Transacciones
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.IdUsuario == idUsuario && t.IdTransaccion == idTransaccion);
+
+            return transaccion == null ? null : MapToDto(transaccion);
+        }
+
+        public async Task<TransaccionDto> CrearTransaccionAsync(Guid idUsuario, TransaccionDto dto)
         {
             var transaccion = new Transaccion
             {
@@ -30,9 +45,53 @@ namespace FocusFlowAPI.Services
             };
 
             _context.Transacciones.Add(transaccion);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return transaccion;
+            return MapToDto(transaccion);
+        }
+
+        public async Task<TransaccionDto?> ActualizarTransaccionAsync(Guid idUsuario, int idTransaccion, TransaccionDto dto)
+        {
+            var transaccion = await _context.Transacciones
+                .FirstOrDefaultAsync(t => t.IdUsuario == idUsuario && t.IdTransaccion == idTransaccion);
+
+            if (transaccion == null)
+                return null;
+
+            transaccion.Monto = dto.Monto;
+            transaccion.Tipo = dto.Tipo;
+            transaccion.Categoria = dto.Categoria;
+            transaccion.Descripcion = dto.Descripcion;
+
+            await _context.SaveChangesAsync();
+
+            return MapToDto(transaccion);
+        }
+
+        public async Task<bool> EliminarTransaccionAsync(Guid idUsuario, int idTransaccion)
+        {
+            var transaccion = await _context.Transacciones
+                .FirstOrDefaultAsync(t => t.IdUsuario == idUsuario && t.IdTransaccion == idTransaccion);
+
+            if (transaccion == null)
+                return false;
+
+            _context.Transacciones.Remove(transaccion);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        private static TransaccionDto MapToDto(Transaccion transaccion)
+        {
+            return new TransaccionDto
+            {
+                IdTransaccion = transaccion.IdTransaccion,
+                Monto = transaccion.Monto,
+                Tipo = transaccion.Tipo,
+                Categoria = transaccion.Categoria,
+                Descripcion = transaccion.Descripcion,
+                Fecha = transaccion.Fecha
+            };
         }
     }
 }

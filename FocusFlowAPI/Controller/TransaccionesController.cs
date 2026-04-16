@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using FocusFlowAPI.Services;
 using FocusFlowAPI.DTOs;
 using FocusFlowAPI.Extensions;
+using FocusFlowAPI.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FocusFlowAPI.Controllers
 {
@@ -20,31 +20,65 @@ namespace FocusFlowAPI.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<TransaccionDto>), StatusCodes.Status200OK)]
-        public IActionResult GetTransacciones()
+        public async Task<IActionResult> GetTransacciones()
         {
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
-            {
-                return Unauthorized("El token no contiene un identificador de usuario válido.");
-            }
+                return Unauthorized("El token no contiene un identificador de usuario valido.");
 
-            var transacciones = _service.ObtenerTransacciones(idUsuario.Value);
+            var transacciones = await _service.ObtenerTransaccionesAsync(idUsuario.Value);
             return Ok(transacciones);
+        }
+
+        [HttpGet("{idTransaccion:int}")]
+        [ProducesResponseType(typeof(TransaccionDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetTransaccion(int idTransaccion)
+        {
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
+                return Unauthorized("El token no contiene un identificador de usuario valido.");
+
+            var transaccion = await _service.ObtenerTransaccionPorIdAsync(idUsuario.Value, idTransaccion);
+            return transaccion == null ? NotFound("Transaccion no encontrada.") : Ok(transaccion);
         }
 
         [HttpPost]
         [ProducesResponseType(typeof(TransaccionDto), StatusCodes.Status200OK)]
-        public IActionResult CrearTransaccion([FromBody] TransaccionDto dto)
+        public async Task<IActionResult> CrearTransaccion([FromBody] TransaccionDto dto)
         {
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
-            {
-                return Unauthorized("El token no contiene un identificador de usuario válido.");
-            }
+                return Unauthorized("El token no contiene un identificador de usuario valido.");
 
-            var transaccion = _service.CrearTransaccion(idUsuario.Value, dto);
+            var transaccion = await _service.CrearTransaccionAsync(idUsuario.Value, dto);
             return Ok(transaccion);
         }
 
+        [HttpPut("{idTransaccion:int}")]
+        [ProducesResponseType(typeof(TransaccionDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ActualizarTransaccion(int idTransaccion, [FromBody] TransaccionDto dto)
+        {
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
+                return Unauthorized("El token no contiene un identificador de usuario valido.");
+
+            var transaccion = await _service.ActualizarTransaccionAsync(idUsuario.Value, idTransaccion, dto);
+            return transaccion == null ? NotFound("Transaccion no encontrada.") : Ok(transaccion);
+        }
+
+        [HttpDelete("{idTransaccion:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> EliminarTransaccion(int idTransaccion)
+        {
+            var idUsuario = User.GetAuthenticatedUserId();
+            if (idUsuario == null)
+                return Unauthorized("El token no contiene un identificador de usuario valido.");
+
+            var eliminada = await _service.EliminarTransaccionAsync(idUsuario.Value, idTransaccion);
+            return eliminada ? NoContent() : NotFound("Transaccion no encontrada.");
+        }
     }
 }

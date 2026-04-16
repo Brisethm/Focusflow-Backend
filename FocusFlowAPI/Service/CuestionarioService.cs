@@ -1,5 +1,6 @@
 using FocusFlowAPI.Models;
 using FocusFlowAPI.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace FocusFlowAPI.Services
 {
@@ -12,47 +13,85 @@ namespace FocusFlowAPI.Services
             _context = context;
         }
 
-        public IEnumerable<Cuestionario> ObtenerCuestionarios(Guid idUsuario)
+        // GET
+        public async Task<IEnumerable<CuestionarioDto>> ObtenerCuestionariosAsync(Guid idUsuario)
         {
-            return _context.Cuestionarios
+            return await _context.Cuestionarios
+                .AsNoTracking()
                 .Where(c => c.IdUsuario == idUsuario)
-                .ToList();
+                .OrderByDescending(c => c.Fecha)
+                .Select(c => new CuestionarioDto
+                {
+                    PuntajeTotal = c.PuntajeTotal,
+                    Completado = c.Completado,
+                    NivelEstres = c.NivelEstres,
+                    NivelEnergia = c.NivelEnergia,
+                    NivelOrganizacion = c.NivelOrganizacion,
+                    NivelProcrastinacion = c.NivelProcrastinacion,
+                    Perfil = c.Perfil,
+
+                    Respuestas = c.Respuestas.Select(r => new RespuestaDto
+                    {
+                        Pregunta = r.Pregunta,
+                        Valor = r.Valor!,
+                        Categoria = r.Categoria,
+                        Puntaje = r.Puntaje
+                    }).ToList()
+                })
+                .ToListAsync();
         }
 
-        public Cuestionario CrearCuestionario(Guid idUsuario, CuestionarioDto dto)
+        // POST
+        public async Task<CuestionarioDto> CrearCuestionarioAsync(Guid idUsuario, CuestionarioDto dto)
         {
-             if (!dto.Completado.HasValue)
-            {
+            if (dto.Completado == null)
                 throw new ArgumentException("El campo Completado es obligatorio.");
-            }
+
             var cuestionario = new Cuestionario
             {
                 IdUsuario = idUsuario,
                 PuntajeTotal = dto.PuntajeTotal,
                 Completado = dto.Completado.Value,
+                NivelEstres = dto.NivelEstres,
+                NivelEnergia = dto.NivelEnergia,
+                NivelOrganizacion = dto.NivelOrganizacion,
+                NivelProcrastinacion = dto.NivelProcrastinacion,
+                Perfil = dto.Perfil,
                 Fecha = DateTime.UtcNow
             };
 
-            _context.Cuestionarios.Add(cuestionario);
-            _context.SaveChanges();
-
-
-            if (dto.Respuestas != null)
+            if (dto.Respuestas != null && dto.Respuestas.Any())
             {
-                foreach (var r in dto.Respuestas)
+                cuestionario.Respuestas = dto.Respuestas.Select(r => new RespuestaCuestionario
                 {
-                    var respuesta = new RespuestaCuestionario
-                    {
-                        IdCuestionario = cuestionario.IdCuestionario,
-                        Pregunta = r.Pregunta,
-                        Valor = r.Valor
-                    };
-                    _context.RespuestasCuestionarios.Add(respuesta);
-                }
-                _context.SaveChanges();
+                    IdUsuario = idUsuario,
+                    Pregunta = r.Pregunta,
+                    Valor = r.Valor,
+                    Categoria = r.Categoria,
+                    Puntaje = r.Puntaje
+                }).ToList();
             }
 
-            return cuestionario;
+            _context.Cuestionarios.Add(cuestionario);
+            await _context.SaveChangesAsync();
+
+            return new CuestionarioDto
+            {
+                PuntajeTotal = cuestionario.PuntajeTotal,
+                Completado = cuestionario.Completado,
+                NivelEstres = cuestionario.NivelEstres,
+                NivelEnergia = cuestionario.NivelEnergia,
+                NivelOrganizacion = cuestionario.NivelOrganizacion,
+                NivelProcrastinacion = cuestionario.NivelProcrastinacion,
+                Perfil = cuestionario.Perfil,
+                Respuestas = cuestionario.Respuestas.Select(r => new RespuestaDto
+                {
+                    Pregunta = r.Pregunta,
+                    Valor = r.Valor ?? string.Empty,
+                    Categoria = r.Categoria,
+                    Puntaje = r.Puntaje
+                }).ToList()
+            };
         }
     }
 }

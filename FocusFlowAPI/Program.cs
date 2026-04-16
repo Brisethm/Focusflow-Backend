@@ -5,6 +5,7 @@ using FocusFlowAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using DotNetEnv;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
@@ -18,6 +19,10 @@ builder.Configuration
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "authenticated";
 var dbConn = builder.Configuration.GetConnectionString("SupabaseDb");
+var dbConnBuilder = new NpgsqlConnectionStringBuilder(dbConn)
+{
+    Multiplexing = false
+};
 var jwksCache = new SupabaseJwksCache($"{jwtIssuer}/.well-known/jwks.json");
 
 builder.Services.AddEndpointsApiExplorer();
@@ -34,7 +39,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<UsuarioContext>(options =>
-    options.UseNpgsql(dbConn, npgsqlOptions => npgsqlOptions.CommandTimeout(180))
+    options.UseNpgsql(dbConnBuilder.ConnectionString, npgsqlOptions => npgsqlOptions.CommandTimeout(180))
 );
 
 // Configuración de autenticación con Supabase (ES256 + JWKS)
@@ -75,6 +80,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 builder.Services.AddScoped<TareaService>();
+builder.Services.AddScoped<PerfilUsuarioService>();
 builder.Services.AddScoped<RecordatorioService>();
 builder.Services.AddScoped<SesionEnfoqueService>();
 builder.Services.AddScoped<RegistroEmocionalService>();

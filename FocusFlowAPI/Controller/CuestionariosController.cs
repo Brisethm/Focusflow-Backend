@@ -20,30 +20,31 @@ namespace FocusFlowAPI.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<CuestionarioDto>), StatusCodes.Status200OK)]
-        public IActionResult GetCuestionarios()
+        public async Task<IActionResult> GetCuestionarios()
         {
             var idUsuario = User.GetAuthenticatedUserId();
+
             if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene un identificador de usuario válido.");
+                return Unauthorized("El token no contiene un identificador de usuario valido.");
             }
 
-            var cuestionarios = _service.ObtenerCuestionarios(idUsuario.Value);
+            var cuestionarios = await _service.ObtenerCuestionariosAsync(idUsuario.Value);
             return Ok(cuestionarios);
         }
 
-
         [HttpPost]
         [ProducesResponseType(typeof(CuestionarioDto), StatusCodes.Status200OK)]
-        public IActionResult CrearCuestionario([FromBody] CuestionarioDto dto)
+        public async Task<IActionResult> CrearCuestionario([FromBody] CuestionarioDto dto)
         {
             var idUsuario = User.GetAuthenticatedUserId();
+
             if (idUsuario == null)
             {
-                return Unauthorized("El token no contiene un identificador de usuario válido.");
+                return Unauthorized("El token no contiene un identificador de usuario valido.");
             }
 
-            var cuestionario = _service.CrearCuestionario(idUsuario.Value, dto);
+            var cuestionario = await _service.CrearCuestionarioAsync(idUsuario.Value, dto);
             return Ok(cuestionario);
         }
     }

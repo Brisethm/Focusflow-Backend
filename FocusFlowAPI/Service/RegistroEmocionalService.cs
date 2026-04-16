@@ -31,6 +31,15 @@ namespace FocusFlowAPI.Services
                 .ToListAsync();
         }
 
+        public async Task<RegistroEmocionalResponseDto?> ObtenerRegistroPorIdAsync(Guid sub, int idRegistro)
+        {
+            var registro = await _context.RegistrosEmocionales
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.IdUsuario == sub && r.IdRegistro == idRegistro);
+
+            return registro == null ? null : MapToResponseDto(registro);
+        }
+
         public async Task<RegistroEmocionalResponseDto> CrearRegistroAsync(Guid sub, RegistroEmocionalDto dto)
         {
             var registro = new RegistroEmocional
@@ -45,6 +54,41 @@ namespace FocusFlowAPI.Services
             _context.RegistrosEmocionales.Add(registro);
             await _context.SaveChangesAsync();
 
+            return MapToResponseDto(registro);
+        }
+
+        public async Task<RegistroEmocionalResponseDto?> ActualizarRegistroAsync(Guid sub, int idRegistro, RegistroEmocionalDto dto)
+        {
+            var registro = await _context.RegistrosEmocionales
+                .FirstOrDefaultAsync(r => r.IdUsuario == sub && r.IdRegistro == idRegistro);
+
+            if (registro == null)
+                return null;
+
+            registro.EstadoAnimo = dto.EstadoAnimo ?? string.Empty;
+            registro.NivelEnergia = dto.NivelEnergia;
+            registro.NotaOpcional = dto.NotaOpcional;
+
+            await _context.SaveChangesAsync();
+
+            return MapToResponseDto(registro);
+        }
+
+        public async Task<bool> EliminarRegistroAsync(Guid sub, int idRegistro)
+        {
+            var registro = await _context.RegistrosEmocionales
+                .FirstOrDefaultAsync(r => r.IdUsuario == sub && r.IdRegistro == idRegistro);
+
+            if (registro == null)
+                return false;
+
+            _context.RegistrosEmocionales.Remove(registro);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        private static RegistroEmocionalResponseDto MapToResponseDto(RegistroEmocional registro)
+        {
             return new RegistroEmocionalResponseDto
             {
                 IdRegistro = registro.IdRegistro,
