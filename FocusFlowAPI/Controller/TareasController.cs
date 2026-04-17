@@ -45,8 +45,12 @@ namespace FocusFlowAPI.Controllers
 
         [HttpPost]
         [ProducesResponseType(typeof(TareaDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> CrearTarea([FromBody] TareaDto dto)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CrearTarea([FromBody] TareaRequestDto dto)
         {
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
                 return Unauthorized("El token no contiene un identificador de usuario valido.");
@@ -57,9 +61,13 @@ namespace FocusFlowAPI.Controllers
 
         [HttpPut("{idTarea:int}")]
         [ProducesResponseType(typeof(TareaDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> ActualizarTarea(int idTarea, [FromBody] TareaDto dto)
+        public async Task<IActionResult> ActualizarTarea(int idTarea, [FromBody] TareaRequestDto dto)
         {
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
                 return Unauthorized("El token no contiene un identificador de usuario valido.");

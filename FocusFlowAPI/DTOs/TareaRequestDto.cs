@@ -1,18 +1,22 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using FocusFlowAPI.Serialization;
 
 namespace FocusFlowAPI.DTOs
 {
-    public class TareaDto
+    public class TareaRequestDto
     {
-        public int IdTarea { get; set; }
+        [Required(ErrorMessage = "El título es obligatorio.")]
         public required string Titulo { get; set; }
-        public required string Prioridad { get; set; }
-        public required string NivelEsfuerzo { get; set; }
-        public required string Estado { get; set; }
 
-        [JsonConverter(typeof(UtcDateTimeJsonConverter))]
-        public DateTime FechaCreacion { get; set; }
+        [Required(ErrorMessage = "La prioridad es obligatoria.")]
+        public required string Prioridad { get; set; }
+
+        [Required(ErrorMessage = "El nivel de esfuerzo es obligatorio.")]
+        public required string NivelEsfuerzo { get; set; }
+
+        [Required(ErrorMessage = "El estado es obligatorio.")]
+        public required string Estado { get; set; }
 
         [JsonConverter(typeof(UtcNullableDateTimeJsonConverter))]
         public DateTime? FechaLimite { get; set; }

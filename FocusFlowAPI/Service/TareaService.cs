@@ -32,7 +32,7 @@ namespace FocusFlowAPI.Services
             return tarea == null ? null : MapToDto(tarea);
         }
 
-        public async Task<TareaDto> CrearTareaAsync(Guid idUsuario, TareaDto dto)
+        public async Task<TareaDto> CrearTareaAsync(Guid idUsuario, TareaRequestDto dto)
         {
             var tarea = new Tarea
             {
@@ -41,7 +41,9 @@ namespace FocusFlowAPI.Services
                 Prioridad = dto.Prioridad,
                 NivelEsfuerzo = dto.NivelEsfuerzo,
                 Estado = dto.Estado,
-                FechaLimite = dto.FechaLimite
+                FechaLimite = dto.FechaLimite.HasValue
+                    ? DateTime.SpecifyKind(dto.FechaLimite.Value, DateTimeKind.Utc)
+                    : null
             };
 
             _context.Tareas.Add(tarea);
@@ -50,7 +52,7 @@ namespace FocusFlowAPI.Services
             return MapToDto(tarea);
         }
 
-        public async Task<TareaDto?> ActualizarTareaAsync(Guid idUsuario, int idTarea, TareaDto dto)
+        public async Task<TareaDto?> ActualizarTareaAsync(Guid idUsuario, int idTarea, TareaRequestDto dto)
         {
             var tarea = await _context.Tareas
                 .FirstOrDefaultAsync(t => t.IdUsuario == idUsuario && t.IdTarea == idTarea);
@@ -62,7 +64,9 @@ namespace FocusFlowAPI.Services
             tarea.Prioridad = dto.Prioridad;
             tarea.NivelEsfuerzo = dto.NivelEsfuerzo;
             tarea.Estado = dto.Estado;
-            tarea.FechaLimite = dto.FechaLimite;
+            tarea.FechaLimite = dto.FechaLimite.HasValue
+                ? DateTime.SpecifyKind(dto.FechaLimite.Value, DateTimeKind.Utc)
+                : null;
 
             await _context.SaveChangesAsync();
 
@@ -91,8 +95,10 @@ namespace FocusFlowAPI.Services
                 Prioridad = tarea.Prioridad,
                 NivelEsfuerzo = tarea.NivelEsfuerzo,
                 Estado = tarea.Estado,
-                FechaCreacion = tarea.FechaCreacion,
-                FechaLimite = tarea.FechaLimite
+                FechaCreacion = DateTime.SpecifyKind(tarea.FechaCreacion, DateTimeKind.Utc),
+                FechaLimite = tarea.FechaLimite.HasValue
+                    ? DateTime.SpecifyKind(tarea.FechaLimite.Value, DateTimeKind.Utc)
+                    : null
             };
         }
     }
