@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FocusFlowAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+252b1ac08d4ed2e9b5d18307fbfb54345340fc5c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ddd2a75a80f8625f9135ecab67609762d345da1b")]
 [assembly: System.Reflection.AssemblyProductAttribute("FocusFlowAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FocusFlowAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

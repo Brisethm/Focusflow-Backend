@@ -443,3 +443,10 @@ C:\Users\BrisethSofíaMarínMos\Desktop\Focusflow-Backend\build-verify\perfil-cr
 C:\Users\BrisethSofíaMarínMos\Desktop\Focusflow-Backend\build-verify\perfil-crud\FocusFlowAPI.runtimeconfig.json
 C:\Users\BrisethSofíaMarínMos\Desktop\Focusflow-Backend\build-verify\perfil-crud\FocusFlowAPI.dll
 C:\Users\BrisethSofíaMarínMos\Desktop\Focusflow-Backend\build-verify\perfil-crud\FocusFlowAPI.pdb
+C:\Users\BrisethSofíaMarínMos\Desktop\Focusflow-Backend\build-verify\planes-fix\appsettings.Development.json
+C:\Users\BrisethSofíaMarínMos\Desktop\Focusflow-Backend\build-verify\planes-fix\appsettings.json
+C:\Users\BrisethSofíaMarínMos\Desktop\Focusflow-Backend\build-verify\planes-fix\FocusFlowAPI.exe
+C:\Users\BrisethSofíaMarínMos\Desktop\Focusflow-Backend\build-verify\planes-fix\FocusFlowAPI.deps.json
+C:\Users\BrisethSofíaMarínMos\Desktop\Focusflow-Backend\build-verify\planes-fix\FocusFlowAPI.runtimeconfig.json
+C:\Users\BrisethSofíaMarínMos\Desktop\Focusflow-Backend\build-verify\planes-fix\FocusFlowAPI.dll
+C:\Users\BrisethSofíaMarínMos\Desktop\Focusflow-Backend\build-verify\planes-fix\FocusFlowAPI.pdb

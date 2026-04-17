@@ -11,6 +11,7 @@ namespace FocusFlowAPI.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PerfilUsuario>().ToTable("perfil_usuario");
+            modelBuilder.Entity<PlanPersonalizado>().ToTable("planes_personalizados");
         }
 
         public DbSet<Tarea> Tareas { get; set; }
@@ -20,5 +21,6 @@ namespace FocusFlowAPI.Models
         public DbSet<Transaccion> Transacciones { get; set; }
         public DbSet<Cuestionario> Cuestionarios { get; set; }
         public DbSet<RespuestaCuestionario> RespuestasCuestionarios { get; set; }
+        public DbSet<PlanPersonalizado> PlanesPersonalizados { get; set; }
     }
 }

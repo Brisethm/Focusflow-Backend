@@ -10,19 +10,31 @@ using Npgsql;
 var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
 
-// Primero carga appsettings y variables de entorno
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-// Variables de entorno
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "authenticated";
 var dbConn = builder.Configuration.GetConnectionString("SupabaseDb");
+
 var dbConnBuilder = new NpgsqlConnectionStringBuilder(dbConn)
 {
-    Multiplexing = false
+    Multiplexing = false,
+    KeepAlive = 5,
+    Timeout = 30,
+    Pooling = true,
+    ConnectionIdleLifetime = 60,
+    ConnectionPruningInterval = 10
 };
+if (dbConnBuilder.ContainsKey("CommandTimeout"))
+    dbConnBuilder.Remove("CommandTimeout");
+
+// Aumentamos el timeout de comando para consultas que pueden tardar más de 5 segundos.
+dbConnBuilder.CommandTimeout = 60;
+
+var connectionString = dbConnBuilder.ConnectionString;
+
 var jwksCache = new SupabaseJwksCache($"{jwtIssuer}/.well-known/jwks.json");
 
 builder.Services.AddEndpointsApiExplorer();
@@ -39,13 +51,22 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<UsuarioContext>(options =>
-    options.UseNpgsql(dbConnBuilder.ConnectionString, npgsqlOptions => npgsqlOptions.CommandTimeout(180))
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+    {
+        npgsqlOptions.CommandTimeout(60); // Timeout de comando a 60 segundos
+        // Reintentos solo para errores transitorios de conexión, NO para timeouts de lectura
+        npgsqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(2),
+            errorCodesToAdd: new[] { "57P01", "57P02", "57P03", "53300" }
+        );
+    })
 );
 
-// Configuración de autenticación con Supabase (ES256 + JWKS)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.MapInboundClaims = false;
         options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = ctx =>
@@ -59,7 +80,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 return Task.CompletedTask;
             }
         };
-
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -68,16 +88,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwtAudience,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
-            {
-                return jwksCache.GetSigningKeys(kid);
-            },
-            // Esto asegura que ASP.NET use directamente el claim "sub" y "role"
+            IssuerSigningKeyResolver = (token, securityToken, kid, parameters) => jwksCache.GetSigningKeys(kid),
             NameClaimType = "sub",
             RoleClaimType = "role"
         };
     });
-
 
 builder.Services.AddScoped<TareaService>();
 builder.Services.AddScoped<PerfilUsuarioService>();
@@ -86,8 +101,21 @@ builder.Services.AddScoped<SesionEnfoqueService>();
 builder.Services.AddScoped<RegistroEmocionalService>();
 builder.Services.AddScoped<TransaccionService>();
 builder.Services.AddScoped<CuestionarioService>();
+builder.Services.AddScoped<PlanPersonalizadoService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<UsuarioContext>();
+    try
+    {
+        await dbContext.Database.OpenConnectionAsync();
+        await dbContext.Database.CloseConnectionAsync();
+    }
+    catch { }
+    NpgsqlConnection.ClearAllPools();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
