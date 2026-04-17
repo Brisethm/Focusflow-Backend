@@ -53,6 +53,7 @@ namespace FocusFlowAPI.Controllers
                 }
 
                 var response = await _supabase.Auth.SignUp(dto.Email, dto.Password);
+                var session = ResolveSession(response);
 
                 if (response?.User?.Id == null)
                     return BadRequest("No se pudo registrar el usuario en Supabase Auth.");
@@ -60,13 +61,16 @@ namespace FocusFlowAPI.Controllers
                 if (!Guid.TryParse(response.User.Id, out var userId))
                     return BadRequest("Supabase devolvio un identificador de usuario invalido.");
 
-                //var perfilCreado = await EnsurePerfilExistsAsync(userId, dto.Nombre);
+                // Opcional: crear perfil local
+                // var perfilCreado = await EnsurePerfilExistsAsync(userId, dto.Nombre);
 
                 return Ok(new
                 {
                     message = "Usuario registrado correctamente",
                     userId = response.User.Id,
-                    //profileReady = perfilCreado
+                    token = session?.AccessToken ?? response.AccessToken,
+                    refreshToken = session?.RefreshToken ?? response.RefreshToken,
+                    // profileReady = perfilCreado
                 });
             }
             catch (GotrueException ex) when (ex.Message.Contains("user_already_exists", StringComparison.OrdinalIgnoreCase))
@@ -111,13 +115,15 @@ namespace FocusFlowAPI.Controllers
             try
             {
                 var response = await _supabase.Auth.SignIn(dto.Email, dto.Password);
+                var session = ResolveSession(response);
 
                 if (response?.User?.Id == null)
                     return Unauthorized(new { message = "Credenciales invalidas." });
 
                 return Ok(new
                 {
-                    token = response.AccessToken,
+                    token = session?.AccessToken ?? response.AccessToken,
+                    refreshToken = session?.RefreshToken ?? response.RefreshToken,
                     userId = response.User.Id
                 });
             }
@@ -181,6 +187,11 @@ namespace FocusFlowAPI.Controllers
                 _context.Entry(perfil).State = EntityState.Detached;
                 return true;
             }
+        }
+
+        private Supabase.Gotrue.Session? ResolveSession(Supabase.Gotrue.Session? session)
+        {
+            return session ?? _supabase.Auth.CurrentSession;
         }
 
         public class ResetPasswordDto
