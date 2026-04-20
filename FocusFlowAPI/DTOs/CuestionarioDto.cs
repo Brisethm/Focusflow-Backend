@@ -5,6 +5,7 @@ namespace FocusFlowAPI.DTOs
 {
     public class CuestionarioDto
     {
+        public int? IdCuestionario { get; set; }
         public int? PuntajeTotal { get; set; }
         public bool? Completado { get; set; }
         public int? NivelEstres { get; set; }

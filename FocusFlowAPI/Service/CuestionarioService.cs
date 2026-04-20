@@ -22,6 +22,7 @@ namespace FocusFlowAPI.Services
                 .OrderByDescending(c => c.Fecha)
                 .Select(c => new CuestionarioDto
                 {
+                    IdCuestionario = c.IdCuestionario,
                     PuntajeTotal = c.PuntajeTotal,
                     Completado = c.Completado,
                     NivelEstres = c.NivelEstres,
@@ -77,6 +78,7 @@ namespace FocusFlowAPI.Services
 
             return new CuestionarioDto
             {
+                IdCuestionario = cuestionario.IdCuestionario,
                 PuntajeTotal = cuestionario.PuntajeTotal,
                 Completado = cuestionario.Completado,
                 NivelEstres = cuestionario.NivelEstres,
