@@ -7879,20 +7879,26 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\BrisethSofíaMarínMos\\.nuget\\packages\\": {}
+    "C:\\Users\\Ayelem\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\BrisethSofíaMarínMos\\Desktop\\Focusflow-Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
+      "projectUniqueName": "C:\\Users\\Ayelem\\Focusflow-Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
       "projectName": "FocusFlowAPI",
-      "projectPath": "C:\\Users\\BrisethSofíaMarínMos\\Desktop\\Focusflow-Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
-      "packagesPath": "C:\\Users\\BrisethSofíaMarínMos\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\BrisethSofíaMarínMos\\Desktop\\Focusflow-Backend\\FocusFlowAPI\\obj\\",
+      "projectPath": "C:\\Users\\Ayelem\\Focusflow-Backend\\FocusFlowAPI\\FocusFlowAPI.csproj",
+      "packagesPath": "C:\\Users\\Ayelem\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Ayelem\\Focusflow-Backend\\FocusFlowAPI\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\BrisethSofíaMarínMos\\Desktop\\Focusflow-Backend\\NuGet.Config",
-        "C:\\Users\\BrisethSofíaMarínMos\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Ayelem\\Focusflow-Backend\\NuGet.Config",
+        "C:\\Users\\Ayelem\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -7915,7 +7921,8 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
@@ -7971,7 +7978,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.415/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
