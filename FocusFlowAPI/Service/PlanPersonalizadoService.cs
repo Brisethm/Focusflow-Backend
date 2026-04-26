@@ -2,10 +2,8 @@ using FocusFlowAPI.DTOs;
 using FocusFlowAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -45,81 +43,23 @@ namespace FocusFlowAPI.Services
             _logger.LogInformation("[PlanPersonalizado] Iniciando creación. Usuario={Usuario}, IdCuestionario={IdCuestionario}",
                 idUsuario, dto.IdCuestionario);
 
-            var strategy = _context.Database.CreateExecutionStrategy();
-            return await strategy.ExecuteAsync(async () =>
+            var plan = new PlanPersonalizado
             {
-                await using var transaction = await _context.Database.BeginTransactionAsync();
-                try
-                {
-                    await ValidarCuestionarioAsync(idUsuario, dto.IdCuestionario);
+                IdUsuario = idUsuario,
+                IdCuestionario = dto.IdCuestionario,
+                HoraDescanso = dto.HoraDescanso!.Value,
+                EnfoqueDiario = dto.EnfoqueDiario!.Value,
+                PausasDiarias = dto.PausasDiarias!.Value
+            };
 
-                    // Verificar si ya existe un plan reciente (idempotencia)
-                    var planExistente = await _context.PlanesPersonalizados
-                        .AsNoTracking()
-                        .Where(p => p.IdUsuario == idUsuario && p.IdCuestionario == dto.IdCuestionario)
-                        .OrderByDescending(p => p.FechaCreacion)
-                        .FirstOrDefaultAsync();
+            _context.PlanesPersonalizados.Add(plan);
 
-                    if (planExistente != null && planExistente.FechaCreacion > DateTime.UtcNow.AddMinutes(-1))
-                    {
-                        _logger.LogWarning("[PlanPersonalizado] Se detectó un plan recién creado (posible duplicado). IdPlan={IdPlan}", planExistente.IdPlan);
-                        await transaction.RollbackAsync();
-                        return MapToDto(planExistente);
-                    }
+            _logger.LogInformation("[PlanPersonalizado] Guardando plan en base de datos...");
+            await _context.SaveChangesAsync();
 
-                    var plan = new PlanPersonalizado
-                    {
-                        IdUsuario = idUsuario,
-                        IdCuestionario = dto.IdCuestionario,
-                        HoraDescanso = dto.HoraDescanso!.Value,
-                        EnfoqueDiario = dto.EnfoqueDiario!.Value,
-                        PausasDiarias = dto.PausasDiarias!.Value
-                    };
-
-                    _context.PlanesPersonalizados.Add(plan);
-
-                    _logger.LogInformation("[PlanPersonalizado] Guardando plan en base de datos...");
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-
-                    _logger.LogInformation("[PlanPersonalizado] Plan guardado correctamente. IdPlan={IdPlan}", plan.IdPlan);
-                    return MapToDto(plan);
-                }
-                catch (DbUpdateException ex) when (ex.InnerException is NpgsqlException npgEx &&
-                                                   (npgEx.Message.Contains("Timeout") || npgEx.SqlState == "57P01"))
-                {
-                    _logger.LogWarning(ex, "[PlanPersonalizado] Timeout al guardar. Verificando si el plan se insertó de todas formas...");
-
-                    var planRecuperado = await _context.PlanesPersonalizados
-                        .AsNoTracking()
-                        .Where(p => p.IdUsuario == idUsuario && p.IdCuestionario == dto.IdCuestionario)
-                        .OrderByDescending(p => p.FechaCreacion)
-                        .FirstOrDefaultAsync();
-
-                    if (planRecuperado != null && planRecuperado.FechaCreacion > DateTime.UtcNow.AddSeconds(-30))
-                    {
-                        await transaction.RollbackAsync();
-                        _logger.LogInformation("[PlanPersonalizado] Plan recuperado exitosamente. IdPlan={IdPlan}", planRecuperado.IdPlan);
-                        return MapToDto(planRecuperado);
-                    }
-
-                    await transaction.RollbackAsync();
-                    throw;
-                }
-                catch (PostgresException ex) when (ex.SqlState == "55P03")
-                {
-                    await transaction.RollbackAsync();
-                    throw new InvalidOperationException("La base de datos no pudo obtener el bloqueo necesario. Intenta de nuevo en unos segundos.");
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    _logger.LogError(ex, "[PlanPersonalizado] Error inesperado al crear plan.");
-                    throw;
-                }
-            });
+            _logger.LogInformation("[PlanPersonalizado] Plan guardado correctamente. IdPlan={IdPlan}", plan.IdPlan);
+            return MapToDto(plan);
         }
-
 
         public async Task<PlanPersonalizadoDto?> ActualizarPlanAsync(Guid idUsuario, int idPlan, CreatePlanDto dto)
         {
@@ -128,7 +68,6 @@ namespace FocusFlowAPI.Services
 
             if (plan == null) return null;
 
-            await ValidarCuestionarioAsync(idUsuario, dto.IdCuestionario);
             _logger.LogInformation("[PlanPersonalizado] Actualizando plan {IdPlan}", idPlan);
 
             plan.IdCuestionario = dto.IdCuestionario;
@@ -136,22 +75,9 @@ namespace FocusFlowAPI.Services
             plan.EnfoqueDiario = dto.EnfoqueDiario!.Value;
             plan.PausasDiarias = dto.PausasDiarias!.Value;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("[PlanPersonalizado] Plan {IdPlan} actualizado correctamente.", idPlan);
-                return MapToDto(plan);
-            }
-            catch (DbUpdateException ex) when (ex.InnerException is NpgsqlException npgEx &&
-                                               npgEx.Message.Contains("Timeout"))
-            {
-                _logger.LogWarning(ex, "[PlanPersonalizado] Timeout al actualizar. Los cambios probablemente se aplicaron.");
-                return MapToDto(plan); // Asumimos que se aplicó
-            }
-            catch (PostgresException ex) when (ex.SqlState == "55P03")
-            {
-                throw new InvalidOperationException("La base de datos no pudo obtener el bloqueo necesario. Intenta de nuevo.");
-            }
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("[PlanPersonalizado] Plan {IdPlan} actualizado correctamente.", idPlan);
+            return MapToDto(plan);
         }
 
         public async Task<bool> EliminarPlanAsync(Guid idUsuario, int idPlan)
@@ -164,18 +90,6 @@ namespace FocusFlowAPI.Services
             _context.PlanesPersonalizados.Remove(plan);
             await _context.SaveChangesAsync();
             return true;
-        }
-
-        private async Task ValidarCuestionarioAsync(Guid idUsuario, int? idCuestionario)
-        {
-            if (!idCuestionario.HasValue) return;
-
-            var cuestionarioExiste = await _context.Cuestionarios
-                .AsNoTracking()
-                .AnyAsync(c => c.IdCuestionario == idCuestionario.Value && c.IdUsuario == idUsuario);
-
-            if (!cuestionarioExiste)
-                throw new ArgumentException("El cuestionario indicado no existe o no pertenece al usuario autenticado.");
         }
 
         private static PlanPersonalizadoDto MapToDto(PlanPersonalizado plan)
