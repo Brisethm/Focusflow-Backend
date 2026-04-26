@@ -7,10 +7,12 @@ namespace FocusFlowAPI.Services
     public class TareaService
     {
         private readonly UsuarioContext _context;
+        private readonly ILogger<TareaService> _logger;
 
-        public TareaService(UsuarioContext context)
+        public TareaService(UsuarioContext context, ILogger<TareaService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<TareaDto>> ObtenerTareasAsync(Guid idUsuario)
@@ -19,17 +21,35 @@ namespace FocusFlowAPI.Services
                 .AsNoTracking()
                 .Where(t => t.IdUsuario == idUsuario)
                 .OrderByDescending(t => t.FechaCreacion)
-                .Select(t => MapToDto(t))
+                .Select(t => new TareaDto
+                {
+                    IdTarea = t.IdTarea,
+                    Titulo = t.Titulo,
+                    Prioridad = t.Prioridad,
+                    NivelEsfuerzo = t.NivelEsfuerzo,
+                    Estado = t.Estado,
+                    FechaCreacion = t.FechaCreacion,
+                    FechaLimite = t.FechaLimite
+                })
                 .ToListAsync();
         }
 
         public async Task<TareaDto?> ObtenerTareaPorIdAsync(Guid idUsuario, int idTarea)
         {
-            var tarea = await _context.Tareas
-                .AsNoTracking()
-                .FirstOrDefaultAsync(t => t.IdUsuario == idUsuario && t.IdTarea == idTarea);
-
-            return tarea == null ? null : MapToDto(tarea);
+            return await _context.Tareas
+            .AsNoTracking()
+            .Where(t => t.IdUsuario == idUsuario && t.IdTarea == idTarea)
+            .Select(t => new TareaDto
+            {
+                IdTarea = t.IdTarea,
+                Titulo = t.Titulo,
+                Prioridad = t.Prioridad,
+                NivelEsfuerzo = t.NivelEsfuerzo,
+                Estado = t.Estado,
+                FechaCreacion = t.FechaCreacion,
+                FechaLimite = t.FechaLimite
+            })
+            .FirstOrDefaultAsync();
         }
 
         public async Task<TareaDto> CrearTareaAsync(Guid idUsuario, TareaRequestDto dto)
@@ -54,36 +74,46 @@ namespace FocusFlowAPI.Services
 
         public async Task<TareaDto?> ActualizarTareaAsync(Guid idUsuario, int idTarea, TareaRequestDto dto)
         {
-            var tarea = await _context.Tareas
-                .FirstOrDefaultAsync(t => t.IdUsuario == idUsuario && t.IdTarea == idTarea);
+            _logger.LogInformation("[ActualizarTarea] Inicio — idUsuario={IdUsuario}, idTarea={IdTarea}", idUsuario, idTarea);
 
-            if (tarea == null)
+            var fechaLimite = dto.FechaLimite.HasValue
+                ? DateTime.SpecifyKind(dto.FechaLimite.Value, DateTimeKind.Utc)
+                : (DateTime?)null;
+
+            var filas = await _context.Tareas
+                .Where(t => t.IdUsuario == idUsuario && t.IdTarea == idTarea)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(t => t.Titulo, dto.Titulo)
+                    .SetProperty(t => t.Prioridad, dto.Prioridad)
+                    .SetProperty(t => t.NivelEsfuerzo, dto.NivelEsfuerzo)
+                    .SetProperty(t => t.Estado, dto.Estado)
+                    .SetProperty(t => t.FechaLimite, fechaLimite)
+                );
+
+            _logger.LogInformation("[ActualizarTarea] Filas afectadas: {Filas}", filas);
+
+            if (filas == 0)
                 return null;
 
-            tarea.Titulo = dto.Titulo;
-            tarea.Prioridad = dto.Prioridad;
-            tarea.NivelEsfuerzo = dto.NivelEsfuerzo;
-            tarea.Estado = dto.Estado;
-            tarea.FechaLimite = dto.FechaLimite.HasValue
-                ? DateTime.SpecifyKind(dto.FechaLimite.Value, DateTimeKind.Utc)
-                : null;
-
-            await _context.SaveChangesAsync();
-
-            return MapToDto(tarea);
+            return new TareaDto
+            {
+                IdTarea = idTarea,
+                Titulo = dto.Titulo,
+                Prioridad = dto.Prioridad,
+                NivelEsfuerzo = dto.NivelEsfuerzo,
+                Estado = dto.Estado,
+                FechaCreacion = DateTime.UtcNow, // El frontend ya lo tiene, no cambia
+                FechaLimite = fechaLimite
+            };
         }
 
         public async Task<bool> EliminarTareaAsync(Guid idUsuario, int idTarea)
         {
-            var tarea = await _context.Tareas
-                .FirstOrDefaultAsync(t => t.IdUsuario == idUsuario && t.IdTarea == idTarea);
+            var filas = await _context.Tareas
+                .Where(t => t.IdUsuario == idUsuario && t.IdTarea == idTarea)
+                .ExecuteDeleteAsync();
 
-            if (tarea == null)
-                return false;
-
-            _context.Tareas.Remove(tarea);
-            await _context.SaveChangesAsync();
-            return true;
+            return filas > 0;
         }
 
         private static TareaDto MapToDto(Tarea tarea)

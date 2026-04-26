@@ -7,13 +7,14 @@ namespace FocusFlowAPI.Services
     public class CuestionarioService
     {
         private readonly UsuarioContext _context;
+        private readonly ILogger<CuestionarioService> _logger;
 
-        public CuestionarioService(UsuarioContext context)
+        public CuestionarioService(UsuarioContext context, ILogger<CuestionarioService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
-        // GET
         public async Task<IEnumerable<CuestionarioDto>> ObtenerCuestionariosAsync(Guid idUsuario)
         {
             return await _context.Cuestionarios
@@ -30,7 +31,6 @@ namespace FocusFlowAPI.Services
                     NivelOrganizacion = c.NivelOrganizacion,
                     NivelProcrastinacion = c.NivelProcrastinacion,
                     Perfil = c.Perfil,
-
                     Respuestas = c.Respuestas.Select(r => new RespuestaDto
                     {
                         Pregunta = r.Pregunta,
@@ -42,7 +42,6 @@ namespace FocusFlowAPI.Services
                 .ToListAsync();
         }
 
-        // POST
         public async Task<CuestionarioDto> CrearCuestionarioAsync(Guid idUsuario, CuestionarioDto dto)
         {
             if (dto.Completado == null)
@@ -58,7 +57,7 @@ namespace FocusFlowAPI.Services
                 NivelOrganizacion = dto.NivelOrganizacion,
                 NivelProcrastinacion = dto.NivelProcrastinacion,
                 Perfil = dto.Perfil,
-                Fecha = DateTime.UtcNow
+                Fecha = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc)
             };
 
             if (dto.Respuestas != null && dto.Respuestas.Any())

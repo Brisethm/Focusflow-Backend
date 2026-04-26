@@ -7,11 +7,14 @@ namespace FocusFlowAPI.Services
     public class PerfilUsuarioService
     {
         private readonly UsuarioContext _context;
+        private readonly ILogger<PerfilUsuarioService> _logger;
 
-        public PerfilUsuarioService(UsuarioContext context)
+        public PerfilUsuarioService(UsuarioContext context, ILogger<PerfilUsuarioService> logger)
         {
             _context = context;
+            _logger = logger;
         }
+
 
         public async Task<PerfilUsuarioDto?> ObtenerPerfilAsync(Guid idUsuario)
         {
@@ -22,9 +25,11 @@ namespace FocusFlowAPI.Services
             return perfil == null ? null : MapToDto(perfil);
         }
 
+
         public async Task<PerfilUsuarioDto> CrearPerfilAsync(Guid idUsuario, PerfilUsuarioDto dto)
         {
             var existente = await _context.PerfilUsuarios
+                .AsNoTracking() 
                 .FirstOrDefaultAsync(p => p.IdUsuario == idUsuario);
 
             if (existente != null)
@@ -41,39 +46,47 @@ namespace FocusFlowAPI.Services
 
             _context.PerfilUsuarios.Add(perfil);
             await _context.SaveChangesAsync();
-
             return MapToDto(perfil);
         }
 
+
         public async Task<PerfilUsuarioDto?> ActualizarPerfilAsync(Guid idUsuario, PerfilUsuarioDto dto)
         {
-            var perfil = await _context.PerfilUsuarios
-                .FirstOrDefaultAsync(p => p.IdUsuario == idUsuario);
+            _logger.LogInformation("[PerfilUsuario] Actualizando perfil del usuario {IdUsuario}", idUsuario);
 
-            if (perfil == null)
+            var filas = await _context.PerfilUsuarios
+                .Where(p => p.IdUsuario == idUsuario)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(p => p.Nombre, dto.Nombre)
+                    .SetProperty(p => p.Edad, dto.Edad)
+                    .SetProperty(p => p.Ocupacion, dto.Ocupacion)
+                    .SetProperty(p => p.ObjetivoPrincipal, dto.ObjetivoPrincipal)
+                );
+
+            if (filas == 0)
                 return null;
 
-            perfil.Nombre = dto.Nombre;
-            perfil.Edad = dto.Edad;
-            perfil.Ocupacion = dto.Ocupacion;
-            perfil.ObjetivoPrincipal = dto.ObjetivoPrincipal;
+            _logger.LogInformation("[PerfilUsuario] Perfil del usuario {IdUsuario} actualizado correctamente.", idUsuario);
 
-            await _context.SaveChangesAsync();
 
-            return MapToDto(perfil);
+            return new PerfilUsuarioDto
+            {
+                IdUsuario = idUsuario,
+                Nombre = dto.Nombre,
+                Edad = dto.Edad,
+                Ocupacion = dto.Ocupacion,
+                ObjetivoPrincipal = dto.ObjetivoPrincipal
+                // IdPerfil y FechaRegistro: el frontend ya los tiene, no cambian en un update
+            };
         }
 
         public async Task<bool> EliminarPerfilAsync(Guid idUsuario)
         {
-            var perfil = await _context.PerfilUsuarios
-                .FirstOrDefaultAsync(p => p.IdUsuario == idUsuario);
+            var filas = await _context.PerfilUsuarios
+                .Where(p => p.IdUsuario == idUsuario)
+                .ExecuteDeleteAsync();
 
-            if (perfil == null)
-                return false;
-
-            _context.PerfilUsuarios.Remove(perfil);
-            await _context.SaveChangesAsync();
-            return true;
+            return filas > 0;
         }
 
         private static PerfilUsuarioDto MapToDto(PerfilUsuario perfil)

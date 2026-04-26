@@ -2,10 +2,6 @@ using FocusFlowAPI.DTOs;
 using FocusFlowAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FocusFlowAPI.Services
 {
@@ -35,6 +31,7 @@ namespace FocusFlowAPI.Services
             var plan = await _context.PlanesPersonalizados
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.IdUsuario == idUsuario && p.IdPlan == idPlan);
+
             return plan == null ? null : MapToDto(plan);
         }
 
@@ -63,33 +60,40 @@ namespace FocusFlowAPI.Services
 
         public async Task<PlanPersonalizadoDto?> ActualizarPlanAsync(Guid idUsuario, int idPlan, CreatePlanDto dto)
         {
-            var plan = await _context.PlanesPersonalizados
-                .FirstOrDefaultAsync(p => p.IdUsuario == idUsuario && p.IdPlan == idPlan);
-
-            if (plan == null) return null;
-
             _logger.LogInformation("[PlanPersonalizado] Actualizando plan {IdPlan}", idPlan);
 
-            plan.IdCuestionario = dto.IdCuestionario;
-            plan.HoraDescanso = dto.HoraDescanso!.Value;
-            plan.EnfoqueDiario = dto.EnfoqueDiario!.Value;
-            plan.PausasDiarias = dto.PausasDiarias!.Value;
+            var filas = await _context.PlanesPersonalizados
+                .Where(p => p.IdUsuario == idUsuario && p.IdPlan == idPlan)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(p => p.IdCuestionario, dto.IdCuestionario)
+                    .SetProperty(p => p.HoraDescanso, dto.HoraDescanso!.Value)
+                    .SetProperty(p => p.EnfoqueDiario, dto.EnfoqueDiario!.Value)
+                    .SetProperty(p => p.PausasDiarias, dto.PausasDiarias!.Value)
+                );
 
-            await _context.SaveChangesAsync();
+            if (filas == 0)
+                return null;
+
             _logger.LogInformation("[PlanPersonalizado] Plan {IdPlan} actualizado correctamente.", idPlan);
-            return MapToDto(plan);
+
+            return new PlanPersonalizadoDto
+            {
+                IdPlan = idPlan,
+                IdUsuario = idUsuario,
+                IdCuestionario = dto.IdCuestionario,
+                HoraDescanso = dto.HoraDescanso!.Value,
+                EnfoqueDiario = dto.EnfoqueDiario!.Value,
+                PausasDiarias = dto.PausasDiarias!.Value
+            };
         }
 
         public async Task<bool> EliminarPlanAsync(Guid idUsuario, int idPlan)
         {
-            var plan = await _context.PlanesPersonalizados
-                .FirstOrDefaultAsync(p => p.IdUsuario == idUsuario && p.IdPlan == idPlan);
+            var filas = await _context.PlanesPersonalizados
+                .Where(p => p.IdUsuario == idUsuario && p.IdPlan == idPlan)
+                .ExecuteDeleteAsync();
 
-            if (plan == null) return false;
-
-            _context.PlanesPersonalizados.Remove(plan);
-            await _context.SaveChangesAsync();
-            return true;
+            return filas > 0;
         }
 
         private static PlanPersonalizadoDto MapToDto(PlanPersonalizado plan)

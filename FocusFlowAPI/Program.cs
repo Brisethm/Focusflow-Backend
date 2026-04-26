@@ -21,7 +21,7 @@ var dbConn = builder.Configuration.GetConnectionString("SupabaseDb");
 var dbConnBuilder = new NpgsqlConnectionStringBuilder(dbConn)
 {
     Multiplexing = false,
-    KeepAlive = 5,
+    KeepAlive = 10,
     Timeout = 30,
     Pooling = true,
     ConnectionIdleLifetime = 60,
@@ -29,9 +29,6 @@ var dbConnBuilder = new NpgsqlConnectionStringBuilder(dbConn)
 };
 if (dbConnBuilder.ContainsKey("CommandTimeout"))
     dbConnBuilder.Remove("CommandTimeout");
-
-// Aumentamos el timeout de comando para consultas que pueden tardar más de 5 segundos.
-dbConnBuilder.CommandTimeout = 60;
 
 var connectionString = dbConnBuilder.ConnectionString;
 
@@ -53,14 +50,11 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<UsuarioContext>(options =>
     options.UseNpgsql(connectionString, npgsqlOptions =>
     {
-        npgsqlOptions.CommandTimeout(60); // Timeout de comando a 60 segundos
-        // Reintentos solo para errores transitorios de conexión, NO para timeouts de lectura
-        npgsqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 3,
-            maxRetryDelay: TimeSpan.FromSeconds(2),
-            errorCodesToAdd: new[] { "57P01", "57P02", "57P03", "53300" }
-        );
+        npgsqlOptions.CommandTimeout(15);
+        // Sin reintentos — el Transaction Pooler de Supabase ya maneja reconexiones
     })
+    .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name },
+           LogLevel.Information)
 );
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -70,13 +64,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = ctx =>
-            {
-                Console.WriteLine($"Auth failed: {ctx.Exception}");
-                return Task.CompletedTask;
-            },
+{
+    var logger = ctx.HttpContext.RequestServices
+        .GetRequiredService<ILogger<Program>>();
+    logger.LogWarning(ctx.Exception, "Auth failed");
+    return Task.CompletedTask;
+},
             OnTokenValidated = ctx =>
             {
-                Console.WriteLine("Token validado correctamente");
                 return Task.CompletedTask;
             }
         };
@@ -110,11 +105,13 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<UsuarioContext>();
     try
     {
-        await dbContext.Database.OpenConnectionAsync();
-        await dbContext.Database.CloseConnectionAsync();
+        await dbContext.Database.CanConnectAsync();
     }
-    catch { }
-    NpgsqlConnection.ClearAllPools();
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "No se pudo conectar a la DB al iniciar");
+    }
 }
 
 app.UseSwagger();
