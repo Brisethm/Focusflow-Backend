@@ -51,7 +51,6 @@ builder.Services.AddDbContext<UsuarioContext>(options =>
     options.UseNpgsql(connectionString, npgsqlOptions =>
     {
         npgsqlOptions.CommandTimeout(15);
-        // Sin reintentos — el Transaction Pooler de Supabase ya maneja reconexiones
     })
     .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name },
            LogLevel.Information)
