@@ -1,20 +1,14 @@
-using System.Text.Json.Serialization;
-using FocusFlowAPI.Serialization;
-
 namespace FocusFlowAPI.DTOs
 {
     public class TareaDto
     {
         public int IdTarea { get; set; }
         public required string Titulo { get; set; }
+        public string? Descripcion { get; set; }
         public required string Prioridad { get; set; }
         public required string NivelEsfuerzo { get; set; }
         public required string Estado { get; set; }
-
-        [JsonConverter(typeof(UtcDateTimeJsonConverter))]
         public DateTime FechaCreacion { get; set; }
-
-        [JsonConverter(typeof(UtcNullableDateTimeJsonConverter))]
         public DateTime? FechaLimite { get; set; }
     }
 }

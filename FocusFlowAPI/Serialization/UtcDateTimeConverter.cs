@@ -5,10 +5,16 @@ using System.Text.Json.Serialization;
 
 namespace FocusFlowAPI.Serialization
 {
-    public class UtcDateTimeJsonConverter : JsonConverter<DateTime>
+    /// <summary>
+    /// Convertidor global que serializa todas las fechas DateTime como UTC con formato ISO 8601 (con Z).
+    /// </summary>
+    public class UtcDateTimeConverter : JsonConverter<DateTime>
     {
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
+            if (reader.TokenType == JsonTokenType.Null)
+                throw new JsonException("La fecha no puede ser nula.");
+
             if (reader.TokenType != JsonTokenType.String)
                 throw new JsonException("La fecha debe enviarse como texto ISO 8601.");
 

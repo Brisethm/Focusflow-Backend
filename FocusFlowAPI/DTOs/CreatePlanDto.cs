@@ -7,7 +7,7 @@ namespace FocusFlowAPI.DTOs
     public class CreatePlanDto
     {
         [Required(ErrorMessage = "La hora de descanso es obligatoria.")]
-        [JsonConverter(typeof(TimeOnlyJsonConverter))]
+        [JsonConverter(typeof(TimeOnlyConverter))]
         public TimeOnly? HoraDescanso { get; set; }
 
         [Required(ErrorMessage = "El enfoque diario es obligatorio.")]

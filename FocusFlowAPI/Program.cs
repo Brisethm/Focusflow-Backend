@@ -2,10 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using FocusFlowAPI.Models;
 using FocusFlowAPI.Security;
 using FocusFlowAPI.Services;
+using FocusFlowAPI.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using DotNetEnv;
 using Npgsql;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
@@ -13,6 +15,16 @@ DotNetEnv.Env.Load();
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddEnvironmentVariables();
+
+// Configuración global de JSON para fechas UTC
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.WriteIndented = false;
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.SerializerOptions.Converters.Add(new UtcDateTimeConverter());
+    options.SerializerOptions.Converters.Add(new UtcNullableDateTimeConverter());
+    options.SerializerOptions.Converters.Add(new TimeOnlyConverter());
+});
 
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "authenticated";

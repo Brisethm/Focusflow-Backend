@@ -4,7 +4,10 @@ using System.Text.Json.Serialization;
 
 namespace FocusFlowAPI.Serialization
 {
-    public class TimeOnlyJsonConverter : JsonConverter<TimeOnly?>
+    /// <summary>
+    /// Convertidor para TimeOnly que serializa como texto en formato HH:mm:ss.
+    /// </summary>
+    public class TimeOnlyConverter : JsonConverter<TimeOnly?>
     {
         private const string TimeFormat = "HH:mm:ss";
 

@@ -5,7 +5,10 @@ using System.Text.Json.Serialization;
 
 namespace FocusFlowAPI.Serialization
 {
-    public class UtcNullableDateTimeJsonConverter : JsonConverter<DateTime?>
+    /// <summary>
+    /// Convertidor para fechas DateTime? (nullable) que serializa como UTC con formato ISO 8601 (con Z).
+    /// </summary>
+    public class UtcNullableDateTimeConverter : JsonConverter<DateTime?>
     {
         public override DateTime? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

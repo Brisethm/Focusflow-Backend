@@ -25,6 +25,7 @@ namespace FocusFlowAPI.Services
                 {
                     IdTarea = t.IdTarea,
                     Titulo = t.Titulo,
+                    Descripcion = t.Descripcion,
                     Prioridad = t.Prioridad,
                     NivelEsfuerzo = t.NivelEsfuerzo,
                     Estado = t.Estado,
@@ -43,6 +44,7 @@ namespace FocusFlowAPI.Services
             {
                 IdTarea = t.IdTarea,
                 Titulo = t.Titulo,
+                Descripcion = t.Descripcion,
                 Prioridad = t.Prioridad,
                 NivelEsfuerzo = t.NivelEsfuerzo,
                 Estado = t.Estado,
@@ -58,6 +60,7 @@ namespace FocusFlowAPI.Services
             {
                 IdUsuario = idUsuario,
                 Titulo = dto.Titulo,
+                Descripcion = dto.Descripcion,
                 Prioridad = dto.Prioridad,
                 NivelEsfuerzo = dto.NivelEsfuerzo,
                 Estado = dto.Estado,
@@ -84,6 +87,7 @@ namespace FocusFlowAPI.Services
                 .Where(t => t.IdUsuario == idUsuario && t.IdTarea == idTarea)
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(t => t.Titulo, dto.Titulo)
+                    .SetProperty(t => t.Descripcion, dto.Descripcion)
                     .SetProperty(t => t.Prioridad, dto.Prioridad)
                     .SetProperty(t => t.NivelEsfuerzo, dto.NivelEsfuerzo)
                     .SetProperty(t => t.Estado, dto.Estado)
@@ -99,10 +103,11 @@ namespace FocusFlowAPI.Services
             {
                 IdTarea = idTarea,
                 Titulo = dto.Titulo,
+                Descripcion = dto.Descripcion,
                 Prioridad = dto.Prioridad,
                 NivelEsfuerzo = dto.NivelEsfuerzo,
                 Estado = dto.Estado,
-                FechaCreacion = DateTime.UtcNow, // El frontend ya lo tiene, no cambia
+                FechaCreacion = DateTime.UtcNow,
                 FechaLimite = fechaLimite
             };
         }
@@ -122,6 +127,7 @@ namespace FocusFlowAPI.Services
             {
                 IdTarea = tarea.IdTarea,
                 Titulo = tarea.Titulo,
+                Descripcion = tarea.Descripcion,
                 Prioridad = tarea.Prioridad,
                 NivelEsfuerzo = tarea.NivelEsfuerzo,
                 Estado = tarea.Estado,
