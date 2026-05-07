@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Supabase;
 using Supabase.Gotrue.Exceptions;
+using Microsoft.AspNetCore.Authorization;
+using FocusFlowAPI.Extensions;
 
 namespace FocusFlowAPI.Controllers
 {
@@ -57,7 +59,7 @@ namespace FocusFlowAPI.Controllers
                     Data = new Dictionary<string, object>
                     {
                         { "nombre", dto.Nombre },
-                        { "rol", dto.Rol } 
+                        { "rol", dto.Rol }
                     }
                 };
 
@@ -180,7 +182,7 @@ namespace FocusFlowAPI.Controllers
             {
                 IdUsuario = userId,
                 Nombre = nombre,
-                Rol = rol 
+                Rol = rol
             };
 
             _context.PerfilUsuarios.Add(perfil);
@@ -212,6 +214,69 @@ namespace FocusFlowAPI.Controllers
         public class UpdatePasswordDto
         {
             public required string NewPassword { get; set; }
+        }
+        [HttpPost("register-staff")]
+        [Authorize]
+        public async Task<IActionResult> RegisterStaff([FromBody] RegisterStaffDto dto)
+        {
+            try
+            {
+                var adminId = User.GetAuthenticatedUserId();
+                if (adminId == null)
+                    return Unauthorized("El token no contiene un identificador válido.");
+
+                var adminProfile = await _context.PerfilUsuarios
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.IdUsuario == adminId.Value);
+
+                if (adminProfile == null || adminProfile.Rol != "admin")
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new
+                    {
+                        message = "Acceso denegado. Solo los administradores pueden crear cuentas de staff."
+                    });
+                }
+
+                var rolesPermitidos = new[] { "admin", "support" };
+                if (!rolesPermitidos.Contains(dto.Rol.ToLower()))
+                {
+                    return BadRequest(new { message = "El rol especificado no es válido." });
+                }
+
+                var signUpOptions = new Supabase.Gotrue.SignUpOptions
+                {
+                    Data = new Dictionary<string, object>
+            {
+                { "nombre", dto.Nombre },
+                { "rol", dto.Rol.ToLower() }
+            }
+                };
+
+                var response = await _supabase.Auth.SignUp(dto.Email, dto.Password, signUpOptions);
+
+                if (response?.User?.Id == null)
+                    return BadRequest("No se pudo registrar la cuenta en Supabase.");
+
+                if (!Guid.TryParse(response.User.Id, out var newUserId))
+                    return BadRequest("Supabase devolvió un identificador inválido.");
+
+                var perfilCreado = await EnsurePerfilExistsAsync(newUserId, dto.Nombre, dto.Rol.ToLower());
+
+                return Ok(new
+                {
+                    message = $"Cuenta de {dto.Rol} creada exitosamente para {dto.Nombre}",
+                    userId = response.User.Id
+                });
+            }
+            catch (GotrueException ex) when (ex.Message.Contains("user_already_exists", StringComparison.OrdinalIgnoreCase))
+            {
+                return Conflict(new { message = "El correo ya está registrado en el sistema." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear cuenta de staff.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Ocurrió un error inesperado." });
+            }
         }
     }
 }
