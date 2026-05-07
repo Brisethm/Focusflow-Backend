@@ -5,6 +5,7 @@ namespace FocusFlowAPI.DTOs
         public int IdPerfil { get; set; }
         public Guid IdUsuario { get; set; }
         public required string Nombre { get; set; }
+        public string? Rol { get; set; }
         public int? Edad { get; set; }
         public string? Ocupacion { get; set; }
         public string? ObjetivoPrincipal { get; set; }

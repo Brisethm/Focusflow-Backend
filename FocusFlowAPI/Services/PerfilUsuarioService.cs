@@ -15,7 +15,6 @@ namespace FocusFlowAPI.Services
             _logger = logger;
         }
 
-
         public async Task<PerfilUsuarioDto?> ObtenerPerfilAsync(Guid idUsuario)
         {
             var perfil = await _context.PerfilUsuarios
@@ -24,7 +23,6 @@ namespace FocusFlowAPI.Services
 
             return perfil == null ? null : MapToDto(perfil);
         }
-
 
         public async Task<PerfilUsuarioDto> CrearPerfilAsync(Guid idUsuario, PerfilUsuarioDto dto)
         {
@@ -41,14 +39,15 @@ namespace FocusFlowAPI.Services
                 Nombre = dto.Nombre,
                 Edad = dto.Edad,
                 Ocupacion = dto.Ocupacion,
-                ObjetivoPrincipal = dto.ObjetivoPrincipal
+                ObjetivoPrincipal = dto.ObjetivoPrincipal,
+                FechaRegistro = DateTime.UtcNow,
+                Rol = dto.Rol
             };
 
             _context.PerfilUsuarios.Add(perfil);
             await _context.SaveChangesAsync();
             return MapToDto(perfil);
         }
-
 
         public async Task<PerfilUsuarioDto?> ActualizarPerfilAsync(Guid idUsuario, PerfilUsuarioDto dto)
         {
@@ -68,7 +67,6 @@ namespace FocusFlowAPI.Services
 
             _logger.LogInformation("[PerfilUsuario] Perfil del usuario {IdUsuario} actualizado correctamente.", idUsuario);
 
-
             return new PerfilUsuarioDto
             {
                 IdUsuario = idUsuario,
@@ -76,7 +74,6 @@ namespace FocusFlowAPI.Services
                 Edad = dto.Edad,
                 Ocupacion = dto.Ocupacion,
                 ObjetivoPrincipal = dto.ObjetivoPrincipal
-                // IdPerfil y FechaRegistro: el frontend ya los tiene, no cambian en un update
             };
         }
 
@@ -96,6 +93,7 @@ namespace FocusFlowAPI.Services
                 IdPerfil = perfil.IdPerfil,
                 IdUsuario = perfil.IdUsuario,
                 Nombre = perfil.Nombre,
+                Rol = perfil.Rol,
                 Edad = perfil.Edad,
                 Ocupacion = perfil.Ocupacion,
                 ObjetivoPrincipal = perfil.ObjetivoPrincipal,

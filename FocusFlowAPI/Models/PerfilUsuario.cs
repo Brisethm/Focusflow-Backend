@@ -17,6 +17,9 @@ namespace FocusFlowAPI.Models
 
         [Column("nombre")]
         public required string Nombre { get; set; }
+        
+        [Column("rol")]
+        public string? Rol { get; set; }
 
         [Column("edad")]
         public int? Edad { get; set; }

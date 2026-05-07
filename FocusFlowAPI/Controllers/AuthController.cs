@@ -52,7 +52,16 @@ namespace FocusFlowAPI.Controllers
                     });
                 }
 
-                var response = await _supabase.Auth.SignUp(dto.Email, dto.Password);
+                var signUpOptions = new Supabase.Gotrue.SignUpOptions
+                {
+                    Data = new Dictionary<string, object>
+                    {
+                        { "nombre", dto.Nombre },
+                        { "rol", dto.Rol } 
+                    }
+                };
+
+                var response = await _supabase.Auth.SignUp(dto.Email, dto.Password, signUpOptions);
                 var session = ResolveSession(response);
 
                 if (response?.User?.Id == null)
@@ -61,8 +70,8 @@ namespace FocusFlowAPI.Controllers
                 if (!Guid.TryParse(response.User.Id, out var userId))
                     return BadRequest("Supabase devolvio un identificador de usuario invalido.");
 
-                // Opcional: crear perfil local
-                // var perfilCreado = await EnsurePerfilExistsAsync(userId, dto.Nombre);
+
+                var perfilCreado = await EnsurePerfilExistsAsync(userId, dto.Nombre, dto.Rol);
 
                 return Ok(new
                 {
@@ -70,7 +79,7 @@ namespace FocusFlowAPI.Controllers
                     userId = response.User.Id,
                     token = session?.AccessToken ?? response.AccessToken,
                     refreshToken = session?.RefreshToken ?? response.RefreshToken,
-                    // profileReady = perfilCreado
+                    profileReady = perfilCreado
                 });
             }
             catch (GotrueException ex) when (ex.Message.Contains("user_already_exists", StringComparison.OrdinalIgnoreCase))
@@ -158,7 +167,7 @@ namespace FocusFlowAPI.Controllers
             return Ok(new { message = "Contrasena actualizada correctamente" });
         }
 
-        private async Task<bool> EnsurePerfilExistsAsync(Guid userId, string nombre)
+        private async Task<bool> EnsurePerfilExistsAsync(Guid userId, string nombre, string rol)
         {
             var perfilExistente = await _context.PerfilUsuarios
                 .AsNoTracking()
@@ -170,7 +179,8 @@ namespace FocusFlowAPI.Controllers
             var perfil = new PerfilUsuario
             {
                 IdUsuario = userId,
-                Nombre = nombre
+                Nombre = nombre,
+                Rol = rol 
             };
 
             _context.PerfilUsuarios.Add(perfil);
