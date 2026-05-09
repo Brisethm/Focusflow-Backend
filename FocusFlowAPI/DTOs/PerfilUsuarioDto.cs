@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace FocusFlowAPI.DTOs
 {
     public class PerfilUsuarioDto
@@ -8,6 +10,8 @@ namespace FocusFlowAPI.DTOs
         public string? Rol { get; set; }
         public int? Edad { get; set; }
         public string? Ocupacion { get; set; }
+
+        [JsonPropertyName("objetivo_principal")]
         public string? ObjetivoPrincipal { get; set; }
         public DateTime FechaRegistro { get; set; }
     }

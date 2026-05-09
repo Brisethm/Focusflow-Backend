@@ -27,11 +27,21 @@ namespace FocusFlowAPI.Services
         public async Task<PerfilUsuarioDto> CrearPerfilAsync(Guid idUsuario, PerfilUsuarioDto dto)
         {
             var existente = await _context.PerfilUsuarios
-                .AsNoTracking() 
                 .FirstOrDefaultAsync(p => p.IdUsuario == idUsuario);
 
             if (existente != null)
+            {
+                existente.Nombre = dto.Nombre;
+                existente.Edad = dto.Edad;
+                existente.Ocupacion = dto.Ocupacion;
+                existente.ObjetivoPrincipal = dto.ObjetivoPrincipal;
+
+                if (!string.IsNullOrWhiteSpace(dto.Rol))
+                    existente.Rol = dto.Rol;
+
+                await _context.SaveChangesAsync();
                 return MapToDto(existente);
+            }
 
             var perfil = new PerfilUsuario
             {
