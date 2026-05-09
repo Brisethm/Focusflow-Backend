@@ -16,7 +16,6 @@ builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-// Configuración global de JSON para fechas UTC
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.WriteIndented = false;
@@ -108,6 +107,7 @@ builder.Services.AddScoped<RegistroEmocionalService>();
 builder.Services.AddScoped<TransaccionService>();
 builder.Services.AddScoped<CuestionarioService>();
 builder.Services.AddScoped<PlanPersonalizadoService>();
+builder.Services.AddScoped<TicketService>();
 
 var app = builder.Build();
 

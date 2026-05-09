@@ -8,7 +8,7 @@ namespace FocusFlowAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // Todo requiere estar logueado
+    [Authorize]
     public class PerfilUsuarioController : ControllerBase
     {
         private readonly PerfilUsuarioService _service;
@@ -52,9 +52,6 @@ namespace FocusFlowAPI.Controllers
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
                 return Unauthorized("El token no contiene un identificador de usuario valido.");
-
-            // 🛡️ PROTECCIÓN: Evitamos que el usuario cambie su propio rol en una actualización.
-            // Al ponerlo en null, tu PerfilUsuarioService debe saber que NO debe actualizar esa columna.
             dto.Rol = null; 
 
             var perfil = await _service.ActualizarPerfilAsync(idUsuario.Value, dto);

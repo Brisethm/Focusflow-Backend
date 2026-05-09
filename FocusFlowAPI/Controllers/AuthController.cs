@@ -156,19 +156,34 @@ namespace FocusFlowAPI.Controllers
         }
 
         [HttpPost("update-password")]
+        [Authorize]
         public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDto dto)
         {
-            var user = await _supabase.Auth.Update(new Supabase.Gotrue.UserAttributes
+            try
             {
-                Password = dto.NewPassword
-            });
+                var authHeader = Request.Headers["Authorization"].ToString();
+                var accessToken = authHeader.Replace("Bearer ", "").Trim();
 
-            if (user == null)
-                return BadRequest("No se pudo actualizar la contrasena.");
+                if (string.IsNullOrEmpty(accessToken))
+                    return Unauthorized(new { message = "Token no encontrado en el header." });
+                await _supabase.Auth.SetSession(accessToken, accessToken);
 
-            return Ok(new { message = "Contrasena actualizada correctamente" });
+                var user = await _supabase.Auth.Update(new Supabase.Gotrue.UserAttributes
+                {
+                    Password = dto.NewPassword
+                });
+
+                if (user == null)
+                    return BadRequest("No se pudo actualizar la contraseña.");
+
+                return Ok(new { message = "Contraseña actualizada correctamente" });
+            }
+            catch (GotrueException ex)
+            {
+                _logger.LogError(ex, "Error de GoTrue al actualizar password");
+                return BadRequest(new { message = ex.Message });
+            }
         }
-
         private async Task<bool> EnsurePerfilExistsAsync(Guid userId, string nombre, string rol)
         {
             var perfilExistente = await _context.PerfilUsuarios

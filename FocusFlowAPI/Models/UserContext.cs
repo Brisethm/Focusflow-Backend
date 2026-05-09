@@ -1,3 +1,4 @@
+using FocusFlowAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FocusFlowAPI.Models
@@ -12,6 +13,8 @@ namespace FocusFlowAPI.Models
         {
             modelBuilder.Entity<PerfilUsuario>().ToTable("perfil_usuario");
             modelBuilder.Entity<PlanPersonalizado>().ToTable("planes_personalizados");
+            modelBuilder.Entity<Ticket>().ToTable("tickets");
+            modelBuilder.Entity<TicketRespuesta>().ToTable("respuestas_tickets");
         }
 
         public DbSet<Tarea> Tareas { get; set; }
@@ -22,5 +25,7 @@ namespace FocusFlowAPI.Models
         public DbSet<Cuestionario> Cuestionarios { get; set; }
         public DbSet<RespuestaCuestionario> RespuestasCuestionarios { get; set; }
         public DbSet<PlanPersonalizado> PlanesPersonalizados { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<TicketRespuesta> RespuestasTickets { get; set; }
     }
 }
