@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using FocusFlowAPI.Models;
 using FocusFlowAPI.Security;
 using FocusFlowAPI.Services;
+using FocusFlowAPI.Hubs;
 using FocusFlowAPI.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -55,7 +56,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy => policy.WithOrigins("http://localhost:5173")
                         .AllowAnyHeader()
-                        .AllowAnyMethod());
+                        .AllowAnyMethod()
+                        .AllowCredentials());
 });
 
 builder.Services.AddDbContext<UsuarioContext>(options =>
@@ -108,6 +110,7 @@ builder.Services.AddScoped<TransaccionService>();
 builder.Services.AddScoped<CuestionarioService>();
 builder.Services.AddScoped<PlanPersonalizadoService>();
 builder.Services.AddScoped<TicketService>();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -137,4 +140,5 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<TicketHub>("/ticketHub");
 await app.RunAsync();

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using FocusFlowAPI.Services;
 using FocusFlowAPI.DTOs;
 using FocusFlowAPI.Extensions;
+using Microsoft.AspNetCore.SignalR;
+using FocusFlowAPI.Hubs;
 
 namespace FocusFlowAPI.Controllers
 {
@@ -12,10 +14,12 @@ namespace FocusFlowAPI.Controllers
     public class TicketsController : ControllerBase
     {
         private readonly TicketService _ticketService;
+        private readonly IHubContext<TicketHub> _hubContext;
 
-        public TicketsController(TicketService ticketService)
+        public TicketsController(TicketService ticketService, IHubContext<TicketHub> hubContext)
         {
             _ticketService = ticketService;
+            _hubContext = hubContext;
         }
 
         [HttpGet("my-tickets")]
@@ -49,6 +53,7 @@ namespace FocusFlowAPI.Controllers
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
                 return Unauthorized("El token no contiene un identificador de usuario válido.");
+
             if (!await _ticketService.IsStaffAsync(idUsuario.Value))
             {
                 return StatusCode(403, new { message = "Acceso denegado. Se requieren permisos de Staff." });
@@ -56,6 +61,7 @@ namespace FocusFlowAPI.Controllers
 
             return Ok(await _ticketService.GetAllTickets());
         }
+
         [HttpGet("{id:int}/responses")]
         public async Task<IActionResult> GetResponses(int id)
         {
@@ -70,6 +76,13 @@ namespace FocusFlowAPI.Controllers
                 return Unauthorized("El token no contiene un identificador de usuario válido.");
 
             var result = await _ticketService.AddResponse(id, idUsuario.Value, dto.Mensaje);
+
+            if (result != null)
+            {
+                await _hubContext.Clients.Group(id.ToString())
+                    .SendAsync("ReceiveMessage", result);
+            }
+
             return Ok(result);
         }
 
@@ -83,11 +96,14 @@ namespace FocusFlowAPI.Controllers
 
             if (!await _ticketService.IsStaffAsync(idUsuario.Value))
             {
-                return StatusCode(403, new { message = "Acceso denegado. Se requieren permisos de Staff." });
+                return StatusCode(403, new { message = "Acceso denegado." });
             }
 
             var result = await _ticketService.UpdateTicketStatus(id, newStatus);
             if (!result) return NotFound(new { message = "Ticket no encontrado" });
+
+            await _hubContext.Clients.Group(id.ToString())
+                .SendAsync("StatusUpdated", new { idTicket = id, nuevoEstado = newStatus });
 
             return Ok(new { message = "Estado actualizado con éxito" });
         }
