@@ -9,6 +9,10 @@ build-verify/
 *.deps.json
 *.runtimeconfig.json
 
+# Cache de herramientas de IA
+.agents/
+.codex/
+
 # Archivos de entorno y secretos
 .env
 .env.*

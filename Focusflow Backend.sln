@@ -1,8 +1,10 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FocusFlowAPI", "FocusFlowAPI\FocusFlowAPI.csproj", "{BD6465B2-D7B2-AB89-8586-504847C10E5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FocusFlow.Tests", "FocusFlow.Tests\FocusFlow.Tests.csproj", "{A821EA6E-8D65-4A6C-883A-A25E762F3CDC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +16,10 @@ Global
 		{BD6465B2-D7B2-AB89-8586-504847C10E5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD6465B2-D7B2-AB89-8586-504847C10E5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD6465B2-D7B2-AB89-8586-504847C10E5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A821EA6E-8D65-4A6C-883A-A25E762F3CDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A821EA6E-8D65-4A6C-883A-A25E762F3CDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A821EA6E-8D65-4A6C-883A-A25E762F3CDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A821EA6E-8D65-4A6C-883A-A25E762F3CDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

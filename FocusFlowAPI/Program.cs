@@ -6,7 +6,7 @@ using FocusFlowAPI.Hubs;
 using FocusFlowAPI.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using DotNetEnv;
+using Microsoft.OpenApi;
 using Npgsql;
 using System.Text.Json;
 
@@ -47,7 +47,26 @@ var connectionString = dbConnBuilder.ConnectionString;
 var jwksCache = new SupabaseJwksCache($"{jwtIssuer}/.well-known/jwks.json");
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Ingresa solo el token JWT, sin el prefijo Bearer."
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecuritySchemeReference("Bearer", document, null),
+            new List<string>()
+        }
+    });
+});
 builder.Services.AddControllers();
 builder.Services.AddSingleton(jwksCache);
 
