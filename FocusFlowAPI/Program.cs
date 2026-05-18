@@ -95,12 +95,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = ctx =>
-{
-    var logger = ctx.HttpContext.RequestServices
-        .GetRequiredService<ILogger<Program>>();
-    logger.LogWarning(ctx.Exception, "Auth failed");
-    return Task.CompletedTask;
-},
+            {
+                var logger = ctx.HttpContext.RequestServices
+                    .GetRequiredService<ILogger<Program>>();
+                logger.LogWarning(ctx.Exception, "Auth failed");
+                return Task.CompletedTask;
+            },
             OnTokenValidated = ctx =>
             {
                 return Task.CompletedTask;
@@ -120,6 +120,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+var supabaseUrl = builder.Configuration["Supabase:Url"];
+var supabaseKey = builder.Configuration["Supabase:AnonKey"];
+
+if (!string.IsNullOrEmpty(supabaseUrl) && !string.IsNullOrEmpty(supabaseKey))
+{
+    builder.Services.AddScoped<Supabase.Client>(_ => new Supabase.Client(
+        supabaseUrl,
+        supabaseKey,
+        new Supabase.SupabaseOptions { AutoRefreshToken = true }
+    ));
+}
+
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<TareaService>();
 builder.Services.AddScoped<PerfilUsuarioService>();
 builder.Services.AddScoped<RecordatorioService>();

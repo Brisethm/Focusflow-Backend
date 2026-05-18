@@ -13,10 +13,10 @@ namespace FocusFlowAPI.Security
         private JsonWebKeySet? _cachedKeySet;
         private DateTimeOffset _expiresAt = DateTimeOffset.MinValue;
 
-        public SupabaseJwksCache(string jwksUrl)
+        public SupabaseJwksCache(string jwksUrl, HttpClient? httpClient = null)
         {
             _jwksUrl = jwksUrl;
-            _httpClient = new HttpClient
+            _httpClient = httpClient ?? new HttpClient
             {
                 Timeout = TimeSpan.FromSeconds(5)
             };
