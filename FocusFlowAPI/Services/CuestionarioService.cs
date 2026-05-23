@@ -4,19 +4,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FocusFlowAPI.Services
 {
-    public class CuestionarioService
+    public class CuestionarioService : ICuestionarioService
     {
         private readonly UsuarioContext _context;
         private readonly ILogger<CuestionarioService> _logger;
 
         public CuestionarioService(UsuarioContext context, ILogger<CuestionarioService> logger)
         {
-            _context = context;
-            _logger = logger;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<IEnumerable<CuestionarioDto>> ObtenerCuestionariosAsync(Guid idUsuario)
         {
+            _logger.LogInformation("Obteniendo cuestionarios para el usuario: {IdUsuario}", idUsuario);
+
             return await _context.Cuestionarios
                 .AsNoTracking()
                 .Where(c => c.IdUsuario == idUsuario)
@@ -34,7 +36,7 @@ namespace FocusFlowAPI.Services
                     Respuestas = c.Respuestas.Select(r => new RespuestaDto
                     {
                         Pregunta = r.Pregunta,
-                        Valor = r.Valor!,
+                        Valor = r.Valor ?? string.Empty,
                         Categoria = r.Categoria,
                         Puntaje = r.Puntaje
                     }).ToList()
@@ -44,8 +46,12 @@ namespace FocusFlowAPI.Services
 
         public async Task<CuestionarioDto> CrearCuestionarioAsync(Guid idUsuario, CuestionarioDto dto)
         {
-            if (dto.Completado == null)
+            _logger.LogInformation("Creando nuevo cuestionario para el usuario: {IdUsuario}", idUsuario);
+
+            if (dto.Completado is null)
+            {
                 throw new ArgumentException("El campo Completado es obligatorio.");
+            }
 
             var cuestionario = new Cuestionario
             {
@@ -57,20 +63,16 @@ namespace FocusFlowAPI.Services
                 NivelOrganizacion = dto.NivelOrganizacion,
                 NivelProcrastinacion = dto.NivelProcrastinacion,
                 Perfil = dto.Perfil,
-                Fecha = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc)
-            };
-
-            if (dto.Respuestas != null && dto.Respuestas.Any())
-            {
-                cuestionario.Respuestas = dto.Respuestas.Select(r => new RespuestaCuestionario
+                Fecha = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+                Respuestas = dto.Respuestas?.Select(r => new RespuestaCuestionario
                 {
                     IdUsuario = idUsuario,
                     Pregunta = r.Pregunta,
                     Valor = r.Valor,
                     Categoria = r.Categoria,
                     Puntaje = r.Puntaje
-                }).ToList();
-            }
+                }).ToList() ?? []
+            };
 
             _context.Cuestionarios.Add(cuestionario);
             await _context.SaveChangesAsync();

@@ -11,22 +11,22 @@ namespace FocusFlowAPI.Controllers
     [Authorize]
     public class CuestionariosController : ControllerBase
     {
-        private readonly CuestionarioService _service;
+        private readonly ICuestionarioService _service;
 
-        public CuestionariosController(CuestionarioService service)
+        public CuestionariosController(ICuestionarioService service)
         {
             _service = service;
         }
 
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<CuestionarioDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetCuestionarios()
         {
             var idUsuario = User.GetAuthenticatedUserId();
-
-            if (idUsuario == null)
+            if (idUsuario is null)
             {
-                return Unauthorized("El token no contiene un identificador de usuario valido.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
             var cuestionarios = await _service.ObtenerCuestionariosAsync(idUsuario.Value);
@@ -35,13 +35,13 @@ namespace FocusFlowAPI.Controllers
 
         [HttpPost]
         [ProducesResponseType(typeof(CuestionarioDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> CrearCuestionario([FromBody] CuestionarioDto dto)
         {
             var idUsuario = User.GetAuthenticatedUserId();
-
-            if (idUsuario == null)
+            if (idUsuario is null)
             {
-                return Unauthorized("El token no contiene un identificador de usuario valido.");
+                return Unauthorized("El token no contiene un identificador de usuario válido.");
             }
 
             var cuestionario = await _service.CrearCuestionarioAsync(idUsuario.Value, dto);
