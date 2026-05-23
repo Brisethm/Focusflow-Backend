@@ -173,3 +173,8 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<TicketHub>("/ticketHub");
 await app.RunAsync();
+
+[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+public partial class Program
+{
+}

@@ -19,7 +19,6 @@ namespace FocusFlow.Tests.Controllers
 
         public TicketsControllerTests()
         {
-            _mockService = new Mock<ITareaService>().As<ITicketService>();
             _mockService = new Mock<ITicketService>();
             _mockHubContext = new Mock<IHubContext<TicketHub>>();
             _controller = new TicketsController(_mockService.Object, _mockHubContext.Object);
@@ -43,6 +42,68 @@ namespace FocusFlow.Tests.Controllers
         }
 
         [Fact]
+        public async Task GetMyTickets_DeberiaRetornarUnauthorized_CuandoTokenNoTieneUsuario()
+        {
+            SetupUser(null);
+
+            var result = await _controller.GetMyTickets();
+
+            Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task GetMyTickets_DeberiaRetornarOk_ConTicketsDelUsuario()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            var tickets = new List<TicketDto>
+            {
+                new() { IdTicket = 1, Asunto = "Ayuda", Estado = "open" }
+            };
+            _mockService.Setup(s => s.GetUserTickets(userId)).ReturnsAsync(tickets);
+
+            var result = await _controller.GetMyTickets();
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            Assert.Same(tickets, ok.Value);
+        }
+
+        [Fact]
+        public async Task CreateTicket_DeberiaRetornarUnauthorized_CuandoTokenNoTieneUsuario()
+        {
+            SetupUser(null);
+
+            var result = await _controller.CreateTicket(new CreateTicketDto());
+
+            Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task CreateTicket_DeberiaRetornarOk_CuandoServicioCreaTicket()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            var dto = new CreateTicketDto { Asunto = "Error", Descripcion = "Detalle" };
+            var created = new TicketDto { IdTicket = 10, Asunto = dto.Asunto, Descripcion = dto.Descripcion };
+            _mockService.Setup(s => s.CreateTicket(userId, dto)).ReturnsAsync(created);
+
+            var result = await _controller.CreateTicket(dto);
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            Assert.Same(created, ok.Value);
+        }
+
+        [Fact]
+        public async Task GetAll_DeberiaRetornarUnauthorized_CuandoTokenNoTieneUsuario()
+        {
+            SetupUser(null);
+
+            var result = await _controller.GetAll();
+
+            Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        [Fact]
         public async Task GetAll_DeberiaRetornarForbidden_CuandoUsuarioNoEsStaff()
         {
             // Arrange
@@ -56,6 +117,49 @@ namespace FocusFlow.Tests.Controllers
             // Assert
             var objectResult = Assert.IsType<ObjectResult>(result);
             Assert.Equal(403, objectResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetAll_DeberiaRetornarOk_CuandoUsuarioEsStaff()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            var tickets = new List<TicketDto>
+            {
+                new() { IdTicket = 1, Asunto = "Ticket" }
+            };
+            _mockService.Setup(s => s.IsStaffAsync(userId)).ReturnsAsync(true);
+            _mockService.Setup(s => s.GetAllTickets()).ReturnsAsync(tickets);
+
+            var result = await _controller.GetAll();
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            Assert.Same(tickets, ok.Value);
+        }
+
+        [Fact]
+        public async Task GetResponses_DeberiaRetornarOk_ConRespuestas()
+        {
+            var respuestas = new List<TicketRespuestaDto>
+            {
+                new() { IdRespuesta = 1, Mensaje = "Hola" }
+            };
+            _mockService.Setup(s => s.GetTicketResponses(5)).ReturnsAsync(respuestas);
+
+            var result = await _controller.GetResponses(5);
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            Assert.Same(respuestas, ok.Value);
+        }
+
+        [Fact]
+        public async Task SendResponse_DeberiaRetornarUnauthorized_CuandoTokenNoTieneUsuario()
+        {
+            SetupUser(null);
+
+            var result = await _controller.SendResponse(1, new CreateRespuestaDto { Mensaje = "Hola" });
+
+            Assert.IsType<UnauthorizedObjectResult>(result);
         }
 
         [Fact]
@@ -88,6 +192,44 @@ namespace FocusFlow.Tests.Controllers
         }
 
         [Fact]
+        public async Task SendResponse_NoDebeNotificarViaSignalR_CuandoServicioRetornaNull()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            _mockService.Setup(s => s.AddResponse(1, userId, "Hola"))
+                .ReturnsAsync((TicketRespuestaDto?)null);
+
+            var result = await _controller.SendResponse(1, new CreateRespuestaDto { Mensaje = "Hola" });
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            Assert.Null(ok.Value);
+            _mockHubContext.Verify(h => h.Clients, Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateStatus_DeberiaRetornarUnauthorized_CuandoTokenNoTieneUsuario()
+        {
+            SetupUser(null);
+
+            var result = await _controller.UpdateStatus(1, "closed");
+
+            Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task UpdateStatus_DeberiaRetornarForbidden_CuandoUsuarioNoEsStaff()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            _mockService.Setup(s => s.IsStaffAsync(userId)).ReturnsAsync(false);
+
+            var result = await _controller.UpdateStatus(1, "closed");
+
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(StatusCodes.Status403Forbidden, objectResult.StatusCode);
+        }
+
+        [Fact]
         public async Task UpdateStatus_DeberiaRetornarNotFound_SiTicketNoExiste()
         {
             // Arrange
@@ -102,6 +244,61 @@ namespace FocusFlow.Tests.Controllers
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task UpdateStatus_DeberiaNotificarViaSignalR_CuandoActualizaEstado()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            _mockService.Setup(s => s.IsStaffAsync(userId)).ReturnsAsync(true);
+            _mockService.Setup(s => s.UpdateTicketStatus(2, "closed")).ReturnsAsync(true);
+
+            var mockClients = new Mock<IHubClients>();
+            var mockClientProxy = new Mock<IClientProxy>();
+            _mockHubContext.Setup(h => h.Clients).Returns(mockClients.Object);
+            mockClients.Setup(c => c.Group("2")).Returns(mockClientProxy.Object);
+
+            var result = await _controller.UpdateStatus(2, "closed");
+
+            Assert.IsType<OkObjectResult>(result);
+            mockClientProxy.Verify(
+                p => p.SendCoreAsync("StatusUpdated", It.Is<object[]>(o => o.Length == 1), default),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task CancelTicket_DeberiaRetornarUnauthorized_CuandoTokenNoTieneUsuario()
+        {
+            SetupUser(null);
+
+            var result = await _controller.CancelTicket(1);
+
+            Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task CancelTicket_DeberiaRetornarBadRequest_CuandoServicioRetornaFalse()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            _mockService.Setup(s => s.CancelTicket(1, userId)).ReturnsAsync(false);
+
+            var result = await _controller.CancelTicket(1);
+
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task CancelTicket_DeberiaRetornarOk_CuandoServicioCancelaTicket()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            _mockService.Setup(s => s.CancelTicket(1, userId)).ReturnsAsync(true);
+
+            var result = await _controller.CancelTicket(1);
+
+            Assert.IsType<OkObjectResult>(result);
         }
     }
 }

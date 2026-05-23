@@ -48,6 +48,45 @@ namespace FocusFlow.Tests.Services
         }
 
         [Fact]
+        public void Constructor_DeberiaLanzarArgumentNullException_CuandoContextoEsNulo()
+        {
+            Assert.Throws<ArgumentNullException>(() => new TicketService(null!));
+        }
+
+        [Fact]
+        public async Task GetUserTickets_DeberiaRetornarSoloTicketsDelUsuario_OrdenadosPorFecha()
+        {
+            var userId = Guid.NewGuid();
+            var otherUserId = Guid.NewGuid();
+            _context.Tickets.AddRange(
+                new Ticket { IdUsuario = userId, Asunto = "Antiguo", Estado = "open", Prioridad = "Baja", FechaCreacion = DateTime.UtcNow.AddDays(-2) },
+                new Ticket { IdUsuario = userId, Asunto = "Nuevo", Estado = "open", Prioridad = "Alta", FechaCreacion = DateTime.UtcNow },
+                new Ticket { IdUsuario = otherUserId, Asunto = "Ajeno", Estado = "open", Prioridad = "Media", FechaCreacion = DateTime.UtcNow.AddDays(1) }
+            );
+            await _context.SaveChangesAsync();
+
+            var result = (await _service.GetUserTickets(userId)).ToList();
+
+            Assert.Equal(2, result.Count);
+            Assert.Equal("Nuevo", result[0].Asunto);
+            Assert.DoesNotContain(result, t => t.Asunto == "Ajeno");
+        }
+
+        [Fact]
+        public async Task GetAllTickets_DeberiaRetornarTodosLosTickets()
+        {
+            _context.Tickets.AddRange(
+                new Ticket { IdUsuario = Guid.NewGuid(), Asunto = "Uno", Estado = "open", Prioridad = "Baja", FechaCreacion = DateTime.UtcNow },
+                new Ticket { IdUsuario = Guid.NewGuid(), Asunto = "Dos", Estado = "closed", Prioridad = "Alta", FechaCreacion = DateTime.UtcNow }
+            );
+            await _context.SaveChangesAsync();
+
+            var result = await _service.GetAllTickets();
+
+            Assert.Equal(2, result.Count());
+        }
+
+        [Fact]
         public async Task IsStaffAsync_DeberiaRetornarTrue_ParaAdminYSupport()
         {
             // Arrange
@@ -66,6 +105,38 @@ namespace FocusFlow.Tests.Services
             Assert.True(await _service.IsStaffAsync(adminId));
             Assert.True(await _service.IsStaffAsync(supportId));
             Assert.False(await _service.IsStaffAsync(idUsuario));
+        }
+
+        [Fact]
+        public async Task GetTicketResponses_DeberiaRetornarListaVacia_CuandoTicketNoExiste()
+        {
+            var respuestas = await _service.GetTicketResponses(999);
+
+            Assert.Empty(respuestas);
+        }
+
+        [Fact]
+        public async Task AddResponse_DeberiaGuardarRespuestaSinCambiarEstado_CuandoRespondeDueno()
+        {
+            var ownerId = Guid.NewGuid();
+            var ticket = new Ticket
+            {
+                IdUsuario = ownerId,
+                Asunto = "Test",
+                Estado = "open",
+                Prioridad = "Baja",
+                FechaCreacion = DateTime.UtcNow
+            };
+            _context.Tickets.Add(ticket);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.AddResponse(ticket.IdTicket, ownerId, "Gracias");
+
+            var ticketActualizado = await _context.Tickets.FindAsync(ticket.IdTicket);
+            Assert.NotNull(result);
+            Assert.False(result!.EsSoporte);
+            Assert.Equal("open", ticketActualizado!.Estado);
+            Assert.Single(_context.RespuestasTickets);
         }
 
         [Fact]
@@ -95,6 +166,28 @@ namespace FocusFlow.Tests.Services
         }
 
         [Fact]
+        public async Task CancelTicket_DeberiaCerrarTicket_CuandoPerteneceAlUsuario()
+        {
+            var ownerId = Guid.NewGuid();
+            var ticket = new Ticket
+            {
+                IdUsuario = ownerId,
+                Asunto = "Test",
+                Estado = "open",
+                Prioridad = "Media",
+                FechaCreacion = DateTime.UtcNow
+            };
+            _context.Tickets.Add(ticket);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.CancelTicket(ticket.IdTicket, ownerId);
+
+            var entity = await _context.Tickets.FindAsync(ticket.IdTicket);
+            Assert.True(result);
+            Assert.Equal("closed", entity!.Estado);
+        }
+
+        [Fact]
         public async Task CancelTicket_DeberiaRetornarFalse_SiTicketNoPerteneceAlUsuario()
         {
             // Arrange
@@ -118,6 +211,35 @@ namespace FocusFlow.Tests.Services
             Assert.False(result);
             var entity = await _context.Tickets.FindAsync(ticket.IdTicket);
             Assert.Equal("open", entity!.Estado);
+        }
+
+        [Fact]
+        public async Task UpdateTicketStatus_DeberiaRetornarFalse_CuandoTicketNoExiste()
+        {
+            var result = await _service.UpdateTicketStatus(999, "closed");
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task UpdateTicketStatus_DeberiaActualizarEstado_CuandoTicketExiste()
+        {
+            var ticket = new Ticket
+            {
+                IdUsuario = Guid.NewGuid(),
+                Asunto = "Test",
+                Estado = "open",
+                Prioridad = "Media",
+                FechaCreacion = DateTime.UtcNow
+            };
+            _context.Tickets.Add(ticket);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.UpdateTicketStatus(ticket.IdTicket, "closed");
+
+            var entity = await _context.Tickets.FindAsync(ticket.IdTicket);
+            Assert.True(result);
+            Assert.Equal("closed", entity!.Estado);
         }
 
         [Fact]
