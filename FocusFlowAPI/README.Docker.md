@@ -1,24 +1,33 @@
-### Building and running your application
+# Guía de Despliegue con Docker - FocusFlow
 
-When you're ready, start your application by running:
-`docker compose up --build`.
+Este documento contiene las instrucciones necesarias para construir, configurar y ejecutar la aplicación utilizando **Docker** y **Docker Compose**.
 
-Your application will be available at http://localhost:5097.
+## Prerrequisitos
 
-### Deploying your application to the cloud
+Antes de comenzar, asegúrate de tener instalado lo siguiente en tu sistema:
 
-First, build your image, e.g.: `docker build -t myapp .`.
-If your cloud uses a different CPU architecture than your development
-machine (e.g., you are on a Mac M1 and your cloud provider is amd64),
-you'll want to build the image for that platform, e.g.:
-`docker build --platform=linux/amd64 -t myapp .`.
+*   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (versión 20.10 o superior)
+*   [Docker Compose](https://docs.docker.com/compose/install/) (incluido en Docker Desktop)
 
-Then, push it to your registry, e.g. `docker push myregistry.com/myapp`.
+---
 
-Consult Docker's [getting started](https://docs.docker.com/go/get-started-sharing/)
-docs for more detail on building and pushing.
+## Configuración del Entorno (`.env`)
 
-### References
-* [Docker's .NET guide](https://docs.docker.com/language/dotnet/)
-* The [dotnet-docker](https://github.com/dotnet/dotnet-docker/tree/main/samples)
-  repository has many relevant samples and docs.
+La aplicación depende de variables de entorno para conectarse a los servicios (Base de datos, Supabase, JWT, etc.). 
+
+Por seguridad, el archivo `.env` **no está incluido en el repositorio**. Sigue estos pasos para configurarlo:
+
+1. En la raíz del proyecto,crea un nuevo archivollamado `.env`.
+2. Define las variables necesarias. Un ejemplo de la estructura requerida es:
+
+```env
+# Configuración del Servidor
+ASPNETCORE_ENVIRONMENT=Production
+
+# Conexión y Seguridad (Ejemplo)
+Supabase__Url="tu_url_de_supabase"
+Supabase__AnonKey="tu_anon_key"
+Jwt__Key="tu_jwt_key"
+Jwt__Issuer="tu_jwt_issuer"
+Jwt__Audience="authenticated"
+ConnectionStrings__SupabaseDb="Host=tu_host;Port=tu_puerto;Database=tu_base_de_datos;User Id=tu_usuario;Password=tu_contraseña;Ssl Mode=Require;Trust Server Certificate=true;Multiplexing=false;Keepalive=10;Pooling=true;Minimum Pool Size=1;Maximum Pool Size=10;No Reset On Close=true"
