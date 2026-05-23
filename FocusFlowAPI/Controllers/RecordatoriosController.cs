@@ -11,9 +11,11 @@ namespace FocusFlowAPI.Controllers
     [Authorize]
     public class RecordatoriosController : ControllerBase
     {
-        private readonly RecordatorioService _service;
+        private readonly IRecordatorioService _service;
+        private const string InvalidUserIdMessage = "El token no contiene un identificador de usuario valido.";
+        private const string RecordatorioNoEncontradoMessage = "Recordatorio no encontrado.";
 
-        public RecordatoriosController(RecordatorioService service)
+        public RecordatoriosController(IRecordatorioService service)
         {
             _service = service;
         }
@@ -24,7 +26,7 @@ namespace FocusFlowAPI.Controllers
         {
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
-                return Unauthorized("El token no contiene un identificador de usuario valido.");
+                return Unauthorized(InvalidUserIdMessage);
 
             var recordatorios = await _service.ObtenerRecordatoriosAsync(idUsuario.Value);
             return Ok(recordatorios);
@@ -37,10 +39,10 @@ namespace FocusFlowAPI.Controllers
         {
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
-                return Unauthorized("El token no contiene un identificador de usuario valido.");
+                return Unauthorized(InvalidUserIdMessage);
 
             var recordatorio = await _service.ObtenerRecordatorioPorIdAsync(idUsuario.Value, idRecordatorio);
-            return recordatorio == null ? NotFound("Recordatorio no encontrado.") : Ok(recordatorio);
+            return recordatorio == null ? NotFound(RecordatorioNoEncontradoMessage) : Ok(recordatorio);
         }
 
         [HttpPost]
@@ -49,7 +51,7 @@ namespace FocusFlowAPI.Controllers
         {
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
-                return Unauthorized("El token no contiene un identificador de usuario valido.");
+                return Unauthorized(InvalidUserIdMessage);
 
             var recordatorio = await _service.CrearRecordatorioAsync(idUsuario.Value, dto);
             return Ok(recordatorio);
@@ -62,10 +64,10 @@ namespace FocusFlowAPI.Controllers
         {
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
-                return Unauthorized("El token no contiene un identificador de usuario valido.");
+                return Unauthorized(InvalidUserIdMessage);
 
             var recordatorio = await _service.ActualizarRecordatorioAsync(idUsuario.Value, idRecordatorio, dto);
-            return recordatorio == null ? NotFound("Recordatorio no encontrado.") : Ok(recordatorio);
+            return recordatorio == null ? NotFound(RecordatorioNoEncontradoMessage) : Ok(recordatorio);
         }
 
         [HttpDelete("{idRecordatorio:int}")]
@@ -75,10 +77,10 @@ namespace FocusFlowAPI.Controllers
         {
             var idUsuario = User.GetAuthenticatedUserId();
             if (idUsuario == null)
-                return Unauthorized("El token no contiene un identificador de usuario valido.");
+                return Unauthorized(InvalidUserIdMessage);
 
             var eliminado = await _service.EliminarRecordatorioAsync(idUsuario.Value, idRecordatorio);
-            return eliminado ? NoContent() : NotFound("Recordatorio no encontrado.");
+            return eliminado ? NoContent() : NotFound(RecordatorioNoEncontradoMessage);
         }
     }
 }

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FocusFlowAPI.Services
 {
-    public class RecordatorioService
+    public class RecordatorioService : IRecordatorioService
     {
         private readonly UsuarioContext _context;
         private readonly ILogger<RecordatorioService> _logger;
