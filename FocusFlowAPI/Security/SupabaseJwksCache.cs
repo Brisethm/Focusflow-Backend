@@ -57,19 +57,22 @@ namespace FocusFlowAPI.Security
                     _cachedKeySet = keySet;
                     _expiresAt = DateTimeOffset.UtcNow.Add(CacheDuration);
                 }
-                catch when (_cachedKeySet is not null)
+                catch (Exception ex)
                 {
-                    // Si Supabase tarda o falla momentáneamente, seguimos usando la última cache válida.
+                    if (_cachedKeySet is not null)
+                    {
+                        // Si Supabase tarda o falla momentáneamente, seguimos usando la última cache válida.
+                    }
+                    else
+                    {
+                        // Si no tenemos cache previa y falla, no podemos continuar.
+                        throw new SecurityTokenSignatureKeyNotFoundException(
+                            "No fue posible obtener las claves de firma de Supabase.", ex
+                        );
+                    }
                 }
 
-                if (_cachedKeySet is null)
-                {
-                    throw new SecurityTokenSignatureKeyNotFoundException(
-                        "No fue posible obtener las claves de firma de Supabase."
-                    );
-                }
-
-                return _cachedKeySet.Keys;
+                return _cachedKeySet!.Keys;
             }
             finally
             {

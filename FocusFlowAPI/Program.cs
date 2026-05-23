@@ -39,8 +39,7 @@ var dbConnBuilder = new NpgsqlConnectionStringBuilder(dbConn)
     ConnectionIdleLifetime = 60,
     ConnectionPruningInterval = 10
 };
-if (dbConnBuilder.ContainsKey("CommandTimeout"))
-    dbConnBuilder.Remove("CommandTimeout");
+dbConnBuilder.Remove("CommandTimeout");
 
 var connectionString = dbConnBuilder.ConnectionString;
 

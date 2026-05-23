@@ -43,7 +43,7 @@ namespace FocusFlow.Tests.Services
         [Fact]
         public async Task CrearRecordatorioAsync_DeberiaLanzarExcepcion_CuandoFechaHoraEsNull()
         {
-            var dto = new RecordatorioDto { Mensaje = "Sin fecha", FechaHora = null };
+            var dto = new RecordatorioDto { Mensaje = "Sin fecha", FechaHora = null, Activo = true };
             await Assert.ThrowsAsync<ArgumentException>(() => _service.CrearRecordatorioAsync(Guid.NewGuid(), dto));
         }
 
@@ -52,7 +52,7 @@ namespace FocusFlow.Tests.Services
         {
             var userId = Guid.NewGuid();
             var fecha = DateTime.UtcNow;
-            var dto = new RecordatorioDto { Mensaje = "Prueba", FechaHora = fecha, Tipo = "app" };
+            var dto = new RecordatorioDto { Mensaje = "Prueba", FechaHora = fecha, Tipo = "app", Activo = true };
 
             var result = await _service.CrearRecordatorioAsync(userId, dto);
 
@@ -79,7 +79,7 @@ namespace FocusFlow.Tests.Services
         [Fact]
         public async Task ActualizarRecordatorioAsync_DeberiaLanzarExcepcion_SiFechaEsNull()
         {
-            var dto = new RecordatorioDto { Mensaje = "Sin mensaje", FechaHora = null };
+            var dto = new RecordatorioDto { Mensaje = "Sin mensaje", FechaHora = null, Activo = true };
             await Assert.ThrowsAsync<ArgumentException>(() => _service.ActualizarRecordatorioAsync(Guid.NewGuid(), 1, dto));
         }
 

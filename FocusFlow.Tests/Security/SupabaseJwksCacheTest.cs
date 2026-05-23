@@ -99,5 +99,28 @@ namespace FocusFlow.Tests.Security
             var cache = new SupabaseJwksCache(FakeJwksUrl, httpClientMock);
             Assert.Throws<SecurityTokenSignatureKeyNotFoundException>(() => cache.GetSigningKeys("key-1"));
         }
+        [Fact]
+        public void GetSigningKeys_DeberiaLanzarExcepcion_CuandoHttpFallaYNoHayCache()
+        {
+            // Arrange: Simulamos una caída de red lanzando un error HTTP directamente
+            var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ThrowsAsync(new HttpRequestException("Error de conexión simulado"));
+
+            var httpClientMock = new HttpClient(handlerMock.Object);
+            var cache = new SupabaseJwksCache(FakeJwksUrl, httpClientMock);
+
+            // Act & Assert
+            var exception = Assert.Throws<SecurityTokenSignatureKeyNotFoundException>(() => cache.GetSigningKeys("key-1"));
+
+            Assert.Contains("No fue posible obtener las claves de firma de Supabase.", exception.Message);
+        }
+
     }
 }

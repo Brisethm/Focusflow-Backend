@@ -4,8 +4,10 @@ namespace FocusFlowAPI.DTOs
 {
     public class PerfilUsuarioDto
     {
-        public int IdPerfil { get; set; }
-        public Guid IdUsuario { get; set; }
+        public int? IdPerfil { get; set; }
+
+        public required Guid IdUsuario { get; set; }
+
         public required string Nombre { get; set; }
         public string? Rol { get; set; }
         public int? Edad { get; set; }
@@ -13,6 +15,7 @@ namespace FocusFlowAPI.DTOs
 
         [JsonPropertyName("objetivo_principal")]
         public string? ObjetivoPrincipal { get; set; }
-        public DateTime FechaRegistro { get; set; }
+
+        public DateTime? FechaRegistro { get; set; }
     }
 }

@@ -8,11 +8,6 @@ namespace FocusFlowAPI.Models
     [Table("cuestionarios")]
     public class Cuestionario
     {
-        public Cuestionario()
-        {
-            Respuestas = new List<RespuestaCuestionario>();
-        }
-
         [Key]
         [Column("id_cuestionario")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -46,7 +41,6 @@ namespace FocusFlowAPI.Models
         [MaxLength(50)]
         [Column("perfil")]
         public string? Perfil { get; set; }
-
         public ICollection<RespuestaCuestionario> Respuestas { get; set; } = new List<RespuestaCuestionario>();
     }
 }

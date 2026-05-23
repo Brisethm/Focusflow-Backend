@@ -76,7 +76,7 @@ namespace FocusFlow.Tests.Controllers
             // Arrange
             var userId = Guid.NewGuid();
             SetupUser(userId);
-            var inputDto = new PerfilUsuarioDto { Nombre = "New User" };
+            var inputDto = new PerfilUsuarioDto { IdUsuario = userId, Nombre = "New User" };
             var outputDto = new PerfilUsuarioDto { IdUsuario = userId, Nombre = "New User", Rol = "user" };
             
             _mockService.Setup(s => s.CrearPerfilAsync(userId, It.IsAny<PerfilUsuarioDto>()))

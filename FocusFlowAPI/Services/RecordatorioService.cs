@@ -24,6 +24,7 @@ namespace FocusFlowAPI.Services
                 .Select(r => MapToDto(r))
                 .ToListAsync();
         }
+        
         public async Task<RecordatorioDto?> ObtenerRecordatorioPorIdAsync(Guid idUsuario, int idRecordatorio)
         {
             var recordatorio = await _context.Recordatorios
@@ -42,9 +43,9 @@ namespace FocusFlowAPI.Services
             {
                 IdUsuario = idUsuario,
                 Mensaje = dto.Mensaje,
-                FechaHora = DateTime.SpecifyKind(dto.FechaHora.Value, DateTimeKind.Utc), // ✅ SpecifyKind
+                FechaHora = DateTime.SpecifyKind(dto.FechaHora.Value, DateTimeKind.Utc),
                 Tipo = dto.Tipo,
-                Activo = dto.Activo
+                Activo = dto.Activo ?? true 
             };
 
             _context.Recordatorios.Add(recordatorio);
@@ -57,7 +58,7 @@ namespace FocusFlowAPI.Services
             if (!dto.FechaHora.HasValue)
                 throw new ArgumentException("El campo FechaHora es obligatorio.");
 
-            var fechaHora = DateTime.SpecifyKind(dto.FechaHora.Value, DateTimeKind.Utc); // ✅ SpecifyKind
+            var fechaHora = DateTime.SpecifyKind(dto.FechaHora.Value, DateTimeKind.Utc); 
 
             _logger.LogInformation("[Recordatorio] Actualizando recordatorio {IdRecordatorio}", idRecordatorio);
 
@@ -67,7 +68,7 @@ namespace FocusFlowAPI.Services
                     .SetProperty(r => r.Mensaje, dto.Mensaje)
                     .SetProperty(r => r.FechaHora, fechaHora)
                     .SetProperty(r => r.Tipo, dto.Tipo)
-                    .SetProperty(r => r.Activo, dto.Activo)
+                    .SetProperty(r => r.Activo, dto.Activo ?? true) 
                 );
 
             if (filas == 0)
@@ -81,7 +82,7 @@ namespace FocusFlowAPI.Services
                 Mensaje = dto.Mensaje ?? string.Empty,
                 FechaHora = fechaHora,
                 Tipo = dto.Tipo,
-                Activo = dto.Activo
+                Activo = dto.Activo ?? true
             };
         }
 

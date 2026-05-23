@@ -41,7 +41,7 @@ namespace FocusFlow.Tests.Controllers
         {
             var userId = Guid.NewGuid();
             SetupUser(userId);
-            var recordatorios = new List<RecordatorioDto> { new RecordatorioDto { IdRecordatorio = 1, Mensaje = "Test" } };
+            var recordatorios = new List<RecordatorioDto> { new RecordatorioDto { IdRecordatorio = 1, Mensaje = "Test", Activo = true } };
             _mockService.Setup(s => s.ObtenerRecordatoriosAsync(userId)).ReturnsAsync(recordatorios);
 
             var result = await _controller.GetRecordatorios();
@@ -76,8 +76,8 @@ namespace FocusFlow.Tests.Controllers
         {
             var userId = Guid.NewGuid();
             SetupUser(userId);
-            var dto = new RecordatorioDto { Mensaje = "Nuevo" };
-            _mockService.Setup(s => s.CrearRecordatorioAsync(userId, dto)).ReturnsAsync(new RecordatorioDto { IdRecordatorio = 10, Mensaje = "Nuevo" });
+            var dto = new RecordatorioDto { Mensaje = "Nuevo", Activo = true };
+            _mockService.Setup(s => s.CrearRecordatorioAsync(userId, dto)).ReturnsAsync(new RecordatorioDto { IdRecordatorio = 10, Mensaje = "Nuevo", Activo = true });
 
             var result = await _controller.CrearRecordatorio(dto);
 
@@ -94,7 +94,7 @@ namespace FocusFlow.Tests.Controllers
             _mockService.Setup(s => s.ActualizarRecordatorioAsync(userId, 1, It.IsAny<RecordatorioDto>()))
                 .ReturnsAsync((RecordatorioDto?)null);
 
-            var result = await _controller.ActualizarRecordatorio(1, new RecordatorioDto { Mensaje = string.Empty });
+            var result = await _controller.ActualizarRecordatorio(1, new RecordatorioDto { Mensaje = string.Empty, Activo = true });
 
             Assert.IsType<NotFoundObjectResult>(result);
         }

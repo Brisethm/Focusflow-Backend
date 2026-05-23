@@ -112,9 +112,9 @@ namespace FocusFlow.Tests.Controllers
             mockAuthService.Setup(s => s.UpdatePasswordAsync("valid-token", dto.NewPassword))
                 .ReturnsAsync(new AuthResponse { Success = true, Message = "Actualizada" });
             var controller = new AuthController(mockAuthService.Object);
-            
+
             var httpContext = new DefaultHttpContext();
-            httpContext.Request.Headers["Authorization"] = "Bearer valid-token";
+            httpContext.Request.Headers.Authorization = "Bearer valid-token";
             controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
             var result = await controller.UpdatePassword("Bearer valid-token", dto);
@@ -131,9 +131,9 @@ namespace FocusFlow.Tests.Controllers
             mockAuthService.Setup(s => s.UpdatePasswordAsync(It.IsAny<string>(), dto.NewPassword))
                 .ReturnsAsync(new AuthResponse { Success = false, StatusCode = 400, Message = "Error" });
             var controller = new AuthController(mockAuthService.Object);
-            
+
             var httpContext = new DefaultHttpContext();
-            httpContext.Request.Headers["Authorization"] = "Bearer token";
+            httpContext.Request.Headers.Authorization = "Bearer token";
             controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
             var result = await controller.UpdatePassword("Bearer token", dto);
@@ -145,12 +145,12 @@ namespace FocusFlow.Tests.Controllers
         [Fact]
         public async Task RegisterStaff_DeberiaRetornarOk_CuandoAdminEstaAutenticado()
         {
-            var dto = new RegisterStaffDto 
-            { 
-                Email = "staff@focusflow.com", 
-                Password = "StaffPassword123!", 
-                Nombre = "Soporte Técnico", 
-                Rol = "support" 
+            var dto = new RegisterStaffDto
+            {
+                Email = "staff@focusflow.com",
+                Password = "StaffPassword123!",
+                Nombre = "Soporte Técnico",
+                Rol = "support"
             };
             var adminId = Guid.NewGuid();
             var mockAuthService = new Mock<IAuthService>();
@@ -158,8 +158,8 @@ namespace FocusFlow.Tests.Controllers
                 .ReturnsAsync(new AuthResponse { Success = true, Message = "Staff creado", UserId = Guid.NewGuid().ToString() });
             var controller = new AuthController(mockAuthService.Object);
 
-            var claims = new List<Claim> 
-            { 
+            var claims = new List<Claim>
+            {
                 new Claim("sub", adminId.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, adminId.ToString())
             };

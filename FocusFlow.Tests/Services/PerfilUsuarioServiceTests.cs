@@ -52,7 +52,7 @@ namespace FocusFlow.Tests.Services
         {
             // Arrange
             var userId = Guid.NewGuid();
-            var dto = new PerfilUsuarioDto { Nombre = "Nuevo", Ocupacion = "Estudiante" };
+            var dto = new PerfilUsuarioDto { IdUsuario = userId, Nombre = "Nuevo", Ocupacion = "Estudiante" };
 
             // Act
             var result = await _service.CrearPerfilAsync(userId, dto);
@@ -73,7 +73,7 @@ namespace FocusFlow.Tests.Services
             _context.PerfilUsuarios.Add(original);
             await _context.SaveChangesAsync();
 
-            var updateDto = new PerfilUsuarioDto { Nombre = "Modificado", Rol = "user" };
+            var updateDto = new PerfilUsuarioDto { IdUsuario = userId, Nombre = "Modificado", Rol = "user" };
 
             // Act
             var result = await _service.CrearPerfilAsync(userId, updateDto);
