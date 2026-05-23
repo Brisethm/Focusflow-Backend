@@ -52,6 +52,10 @@ Desktop.ini
 
 # Test coverage y reportes
 coverage/
+TestResults/
 *.coverage
 *.coveragexml
+*.cobertura.xml
+*.opencover.xml
+*.trx
 TestResult.xml

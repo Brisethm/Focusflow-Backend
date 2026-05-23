@@ -52,13 +52,15 @@ jobs:
         shell: powershell
         run: |
           # 1. Iniciar el scanner usando la variable de entorno nativa de Windows ($env:)
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"Brisethm_Focusflow-Backend" /o:"focusflow" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.cs.vstest.reportsPaths="**/TestResults/**/coverage.cobertura.xml"
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"Brisethm_Focusflow-Backend" /o:"focusflow" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.cs.vstest.reportsPaths="TestResults/*.trx" /d:sonar.cs.opencover.reportsPaths="TestResults/coverage.opencover.xml"
           
           # 2. Compilar el proyecto completo
           dotnet build
           
-          # 3. Correr los tests generando el reporte XML dentro de TestResults
-          dotnet test --no-build --collect:"XPlat Code Coverage"
+          # 3. Correr los tests generando resultados TRX y cobertura OpenCover dentro de TestResults
+          New-Item -Path "TestResults" -ItemType Directory -Force
+          $coveragePath = Join-Path $PWD "TestResults\coverage.opencover.xml"
+          dotnet test "FocusFlow.Tests\FocusFlow.Tests.csproj" --no-build --logger "trx" --results-directory "TestResults" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="$coveragePath"
           
           # 4. Finalizar el análisis enviando los datos acumulados
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="$env:SONAR_TOKEN"
