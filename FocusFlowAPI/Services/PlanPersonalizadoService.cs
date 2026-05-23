@@ -1,19 +1,18 @@
 using FocusFlowAPI.DTOs;
 using FocusFlowAPI.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace FocusFlowAPI.Services
 {
-    public class PlanPersonalizadoService
+    public class PlanPersonalizadoService : IPlanPersonalizadoService
     {
         private readonly UsuarioContext _context;
         private readonly ILogger<PlanPersonalizadoService> _logger;
 
         public PlanPersonalizadoService(UsuarioContext context, ILogger<PlanPersonalizadoService> logger)
         {
-            _context = context;
-            _logger = logger;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<IEnumerable<PlanPersonalizadoDto>> ObtenerPlanesAsync(Guid idUsuario)
@@ -22,7 +21,16 @@ namespace FocusFlowAPI.Services
                 .AsNoTracking()
                 .Where(p => p.IdUsuario == idUsuario)
                 .OrderByDescending(p => p.FechaCreacion)
-                .Select(p => MapToDto(p))
+                .Select(p => new PlanPersonalizadoDto
+                {
+                    IdPlan = p.IdPlan,
+                    IdUsuario = p.IdUsuario,
+                    IdCuestionario = p.IdCuestionario,
+                    HoraDescanso = p.HoraDescanso,
+                    EnfoqueDiario = p.EnfoqueDiario,
+                    PausasDiarias = p.PausasDiarias,
+                    FechaCreacion = p.FechaCreacion
+                })
                 .ToListAsync();
         }
 
@@ -32,7 +40,7 @@ namespace FocusFlowAPI.Services
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.IdUsuario == idUsuario && p.IdPlan == idPlan);
 
-            return plan == null ? null : MapToDto(plan);
+            return plan is null ? null : MapToDto(plan);
         }
 
         public async Task<PlanPersonalizadoDto> CrearPlanAsync(Guid idUsuario, CreatePlanDto dto)
@@ -44,14 +52,15 @@ namespace FocusFlowAPI.Services
             {
                 IdUsuario = idUsuario,
                 IdCuestionario = dto.IdCuestionario,
-                HoraDescanso = dto.HoraDescanso!.Value,
-                EnfoqueDiario = dto.EnfoqueDiario!.Value,
-                PausasDiarias = dto.PausasDiarias!.Value
+                HoraDescanso = dto.HoraDescanso ?? TimeOnly.MinValue,
+                EnfoqueDiario = dto.EnfoqueDiario ?? 0,
+                PausasDiarias = dto.PausasDiarias ?? 0,
+                FechaCreacion = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc)
             };
 
             _context.PlanesPersonalizados.Add(plan);
 
-            _logger.LogInformation("[PlanPersonalizado] Guardando plan en base de datos...");
+            _logger.LogDebug("[PlanPersonalizado] Guardando plan en base de datos...");
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("[PlanPersonalizado] Plan guardado correctamente. IdPlan={IdPlan}", plan.IdPlan);
@@ -66,24 +75,26 @@ namespace FocusFlowAPI.Services
                 .Where(p => p.IdUsuario == idUsuario && p.IdPlan == idPlan)
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(p => p.IdCuestionario, dto.IdCuestionario)
-                    .SetProperty(p => p.HoraDescanso, dto.HoraDescanso!.Value)
-                    .SetProperty(p => p.EnfoqueDiario, dto.EnfoqueDiario!.Value)
-                    .SetProperty(p => p.PausasDiarias, dto.PausasDiarias!.Value)
+                    .SetProperty(p => p.HoraDescanso, dto.HoraDescanso ?? TimeOnly.MinValue)
+                    .SetProperty(p => p.EnfoqueDiario, dto.EnfoqueDiario ?? 0)
+                    .SetProperty(p => p.PausasDiarias, dto.PausasDiarias ?? 0)
                 );
 
-            if (filas == 0)
+            if (filas is 0)
+            {
                 return null;
+            }
 
-            _logger.LogInformation("[PlanPersonalizado] Plan {IdPlan} actualizado correctamente.", idPlan);
+            _logger.LogInformation("[PlanPersonalizado] Plan {IdPlan} updated successfully.", idPlan);
 
             return new PlanPersonalizadoDto
             {
                 IdPlan = idPlan,
                 IdUsuario = idUsuario,
                 IdCuestionario = dto.IdCuestionario,
-                HoraDescanso = dto.HoraDescanso!.Value,
-                EnfoqueDiario = dto.EnfoqueDiario!.Value,
-                PausasDiarias = dto.PausasDiarias!.Value
+                HoraDescanso = dto.HoraDescanso ?? TimeOnly.MinValue,
+                EnfoqueDiario = dto.EnfoqueDiario ?? 0,
+                PausasDiarias = dto.PausasDiarias ?? 0
             };
         }
 
@@ -96,9 +107,8 @@ namespace FocusFlowAPI.Services
             return filas > 0;
         }
 
-        private static PlanPersonalizadoDto MapToDto(PlanPersonalizado plan)
-        {
-            return new PlanPersonalizadoDto
+        private static PlanPersonalizadoDto MapToDto(PlanPersonalizado plan) =>
+            new()
             {
                 IdPlan = plan.IdPlan,
                 IdUsuario = plan.IdUsuario,
@@ -108,6 +118,5 @@ namespace FocusFlowAPI.Services
                 PausasDiarias = plan.PausasDiarias,
                 FechaCreacion = plan.FechaCreacion
             };
-        }
     }
 }
