@@ -4,22 +4,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FocusFlowAPI.Services
 {
-    public class RegistroEmocionalService
+    public class RegistroEmocionalService : IRegistroEmocionalService
     {
         private readonly UsuarioContext _context;
         private readonly ILogger<RegistroEmocionalService> _logger;
 
         public RegistroEmocionalService(UsuarioContext context, ILogger<RegistroEmocionalService> logger)
         {
-            _context = context;
-            _logger = logger;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<IEnumerable<RegistroEmocionalResponseDto>> ObtenerRegistrosAsync(Guid sub)
+        public async Task<IEnumerable<RegistroEmocionalResponseDto>> ObtenerRegistrosAsync(Guid idUsuario)
         {
             return await _context.RegistrosEmocionales
                 .AsNoTracking()
-                .Where(r => r.IdUsuario == sub)
+                .Where(r => r.IdUsuario == idUsuario)
                 .OrderByDescending(r => r.Fecha)
                 .Select(r => new RegistroEmocionalResponseDto
                 {
@@ -33,20 +33,20 @@ namespace FocusFlowAPI.Services
                 .ToListAsync();
         }
 
-        public async Task<RegistroEmocionalResponseDto?> ObtenerRegistroPorIdAsync(Guid sub, int idRegistro)
+        public async Task<RegistroEmocionalResponseDto?> ObtenerRegistroPorIdAsync(Guid idUsuario, int idRegistro)
         {
             var registro = await _context.RegistrosEmocionales
                 .AsNoTracking()
-                .FirstOrDefaultAsync(r => r.IdUsuario == sub && r.IdRegistro == idRegistro);
+                .FirstOrDefaultAsync(r => r.IdUsuario == idUsuario && r.IdRegistro == idRegistro);
 
-            return registro == null ? null : MapToResponseDto(registro);
+            return registro is null ? null : MapToResponseDto(registro);
         }
 
-        public async Task<RegistroEmocionalResponseDto> CrearRegistroAsync(Guid sub, RegistroEmocionalDto dto)
+        public async Task<RegistroEmocionalResponseDto> CrearRegistroAsync(Guid idUsuario, RegistroEmocionalDto dto)
         {
             var registro = new RegistroEmocional
             {
-                IdUsuario = sub,
+                IdUsuario = idUsuario,
                 EstadoAnimo = dto.EstadoAnimo ?? string.Empty,
                 NivelEnergia = dto.NivelEnergia,
                 NotaOpcional = dto.NotaOpcional,
@@ -58,44 +58,47 @@ namespace FocusFlowAPI.Services
             return MapToResponseDto(registro);
         }
 
-        public async Task<RegistroEmocionalResponseDto?> ActualizarRegistroAsync(Guid sub, int idRegistro, RegistroEmocionalDto dto)
+        public async Task<RegistroEmocionalResponseDto?> ActualizarRegistroAsync(Guid idUsuario, int idRegistro, RegistroEmocionalDto dto)
         {
             _logger.LogInformation("[RegistroEmocional] Actualizando registro {IdRegistro}", idRegistro);
 
             var filas = await _context.RegistrosEmocionales
-                .Where(r => r.IdUsuario == sub && r.IdRegistro == idRegistro)
+                .Where(r => r.IdUsuario == idUsuario && r.IdRegistro == idRegistro)
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(r => r.EstadoAnimo, dto.EstadoAnimo ?? string.Empty)
                     .SetProperty(r => r.NivelEnergia, dto.NivelEnergia)
                     .SetProperty(r => r.NotaOpcional, dto.NotaOpcional)
                 );
 
-            if (filas == 0)
+            if (filas is 0)
+            {
                 return null;
+            }
 
             _logger.LogInformation("[RegistroEmocional] Registro {IdRegistro} actualizado correctamente.", idRegistro);
 
             return new RegistroEmocionalResponseDto
             {
                 IdRegistro = idRegistro,
-                IdUsuario = sub,
+                IdUsuario = idUsuario,
                 EstadoAnimo = dto.EstadoAnimo ?? string.Empty,
                 NivelEnergia = dto.NivelEnergia,
-                NotaOpcional = dto.NotaOpcional
+                NotaOpcional = dto.NotaOpcional,
+                Fecha = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc)
             };
         }
 
-        public async Task<bool> EliminarRegistroAsync(Guid sub, int idRegistro)
+        public async Task<bool> EliminarRegistroAsync(Guid idUsuario, int idRegistro)
         {
             var filas = await _context.RegistrosEmocionales
-                .Where(r => r.IdUsuario == sub && r.IdRegistro == idRegistro)
+                .Where(r => r.IdUsuario == idUsuario && r.IdRegistro == idRegistro)
                 .ExecuteDeleteAsync();
 
             return filas > 0;
         }
-        private static RegistroEmocionalResponseDto MapToResponseDto(RegistroEmocional registro)
-        {
-            return new RegistroEmocionalResponseDto
+
+        private static RegistroEmocionalResponseDto MapToResponseDto(RegistroEmocional registro) =>
+            new()
             {
                 IdRegistro = registro.IdRegistro,
                 IdUsuario = registro.IdUsuario,
@@ -104,6 +107,5 @@ namespace FocusFlowAPI.Services
                 NotaOpcional = registro.NotaOpcional,
                 Fecha = registro.Fecha
             };
-        }
     }
 }
