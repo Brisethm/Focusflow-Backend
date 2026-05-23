@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FocusFlowAPI.Services
 {
-    public class PerfilUsuarioService
+    public class PerfilUsuarioService : IPerfilUsuarioService
     {
         private readonly UsuarioContext _context;
         private readonly ILogger<PerfilUsuarioService> _logger;
 
         public PerfilUsuarioService(UsuarioContext context, ILogger<PerfilUsuarioService> logger)
         {
-            _context = context;
-            _logger = logger;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<PerfilUsuarioDto?> ObtenerPerfilAsync(Guid idUsuario)
@@ -21,7 +21,7 @@ namespace FocusFlowAPI.Services
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.IdUsuario == idUsuario);
 
-            return perfil == null ? null : MapToDto(perfil);
+            return perfil is null ? null : MapToDto(perfil);
         }
 
         public async Task<PerfilUsuarioDto> CrearPerfilAsync(Guid idUsuario, PerfilUsuarioDto dto)
@@ -29,7 +29,7 @@ namespace FocusFlowAPI.Services
             var existente = await _context.PerfilUsuarios
                 .FirstOrDefaultAsync(p => p.IdUsuario == idUsuario);
 
-            if (existente != null)
+            if (existente is not null)
             {
                 existente.Nombre = dto.Nombre;
                 existente.Edad = dto.Edad;
@@ -37,7 +37,9 @@ namespace FocusFlowAPI.Services
                 existente.ObjetivoPrincipal = dto.ObjetivoPrincipal;
 
                 if (!string.IsNullOrWhiteSpace(dto.Rol))
+                {
                     existente.Rol = dto.Rol;
+                }
 
                 await _context.SaveChangesAsync();
                 return MapToDto(existente);
@@ -50,7 +52,7 @@ namespace FocusFlowAPI.Services
                 Edad = dto.Edad,
                 Ocupacion = dto.Ocupacion,
                 ObjetivoPrincipal = dto.ObjetivoPrincipal,
-                FechaRegistro = DateTime.UtcNow,
+                FechaRegistro = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
                 Rol = dto.Rol
             };
 
@@ -72,8 +74,10 @@ namespace FocusFlowAPI.Services
                     .SetProperty(p => p.ObjetivoPrincipal, dto.ObjetivoPrincipal)
                 );
 
-            if (filas == 0)
+            if (filas is 0)
+            {
                 return null;
+            }
 
             _logger.LogInformation("[PerfilUsuario] Perfil del usuario {IdUsuario} actualizado correctamente.", idUsuario);
 
@@ -83,7 +87,10 @@ namespace FocusFlowAPI.Services
                 Nombre = dto.Nombre,
                 Edad = dto.Edad,
                 Ocupacion = dto.Ocupacion,
-                ObjetivoPrincipal = dto.ObjetivoPrincipal
+                ObjetivoPrincipal = dto.ObjetivoPrincipal,
+                Rol = dto.Rol,
+                IdPerfil = dto.IdPerfil,
+                FechaRegistro = dto.FechaRegistro
             };
         }
 
@@ -96,9 +103,8 @@ namespace FocusFlowAPI.Services
             return filas > 0;
         }
 
-        private static PerfilUsuarioDto MapToDto(PerfilUsuario perfil)
-        {
-            return new PerfilUsuarioDto
+        private static PerfilUsuarioDto MapToDto(PerfilUsuario perfil) =>
+            new()
             {
                 IdPerfil = perfil.IdPerfil,
                 IdUsuario = perfil.IdUsuario,
@@ -109,6 +115,5 @@ namespace FocusFlowAPI.Services
                 ObjetivoPrincipal = perfil.ObjetivoPrincipal,
                 FechaRegistro = perfil.FechaRegistro
             };
-        }
     }
 }
