@@ -4,14 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FocusFlowAPI.Services
 {
-    public class SesionEnfoqueService
+    public class SesionEnfoqueService : ISesionEnfoqueService
     {
         private readonly UsuarioContext _context;
         private readonly ILogger<SesionEnfoqueService> _logger;
 
-        public SesionEnfoqueService(UsuarioContext context, ILogger<SesionEnfoqueService> logger){
-            _context = context;
-            _logger = logger;
+        public SesionEnfoqueService(UsuarioContext context, ILogger<SesionEnfoqueService> logger)
+        {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<IEnumerable<SesionEnfoqueDto>> ObtenerSesionesAsync(Guid idUsuario)
@@ -20,16 +21,23 @@ namespace FocusFlowAPI.Services
                 .AsNoTracking()
                 .Where(s => s.IdUsuario == idUsuario)
                 .OrderByDescending(s => s.Fecha)
-                .Select(s => MapToDto(s))
+                .Select(s => new SesionEnfoqueDto
+                {
+                    IdSesion = s.IdSesion,
+                    DuracionMinutos = s.DuracionMinutos,
+                    Tipo = s.Tipo,
+                    Fecha = s.Fecha
+                })
                 .ToListAsync();
         }
+
         public async Task<SesionEnfoqueDto?> ObtenerSesionPorIdAsync(Guid idUsuario, int idSesion)
         {
             var sesion = await _context.SesionesEnfoque
                 .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.IdUsuario == idUsuario && s.IdSesion == idSesion);
 
-            return sesion == null ? null : MapToDto(sesion);
+            return sesion is null ? null : MapToDto(sesion);
         }
 
         public async Task<SesionEnfoqueDto> CrearSesionAsync(Guid idUsuario, SesionEnfoqueDto dto)
@@ -46,6 +54,7 @@ namespace FocusFlowAPI.Services
             await _context.SaveChangesAsync();
             return MapToDto(sesion);
         }
+
         public async Task<SesionEnfoqueDto?> ActualizarSesionAsync(Guid idUsuario, int idSesion, SesionEnfoqueDto dto)
         {
             _logger.LogInformation("[SesionEnfoque] Actualizando sesión {IdSesion}", idSesion);
@@ -53,12 +62,14 @@ namespace FocusFlowAPI.Services
             var filas = await _context.SesionesEnfoque
                 .Where(s => s.IdUsuario == idUsuario && s.IdSesion == idSesion)
                 .ExecuteUpdateAsync(s => s
-                    .SetProperty(s => s.DuracionMinutos, dto.DuracionMinutos)
-                    .SetProperty(s => s.Tipo, dto.Tipo)
+                    .SetProperty(x => x.DuracionMinutos, dto.DuracionMinutos)
+                    .SetProperty(x => x.Tipo, dto.Tipo)
                 );
 
-            if (filas == 0)
+            if (filas is 0)
+            {
                 return null;
+            }
 
             _logger.LogInformation("[SesionEnfoque] Sesión {IdSesion} actualizada correctamente.", idSesion);
 
@@ -66,9 +77,11 @@ namespace FocusFlowAPI.Services
             {
                 IdSesion = idSesion,
                 DuracionMinutos = dto.DuracionMinutos,
-                Tipo = dto.Tipo
+                Tipo = dto.Tipo,
+                Fecha = dto.Fecha
             };
         }
+
         public async Task<bool> EliminarSesionAsync(Guid idUsuario, int idSesion)
         {
             var filas = await _context.SesionesEnfoque
@@ -78,15 +91,13 @@ namespace FocusFlowAPI.Services
             return filas > 0;
         }
 
-        private static SesionEnfoqueDto MapToDto(SesionEnfoque sesion)
-        {
-            return new SesionEnfoqueDto
+        private static SesionEnfoqueDto MapToDto(SesionEnfoque sesion) =>
+            new()
             {
                 IdSesion = sesion.IdSesion,
                 DuracionMinutos = sesion.DuracionMinutos,
                 Tipo = sesion.Tipo,
                 Fecha = sesion.Fecha
             };
-        }
     }
 }
