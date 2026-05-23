@@ -141,7 +141,7 @@ builder.Services.AddScoped<RegistroEmocionalService>();
 builder.Services.AddScoped<TransaccionService>();
 builder.Services.AddScoped<ICuestionarioService, CuestionarioService>();
 builder.Services.AddScoped<IPlanPersonalizadoService, PlanPersonalizadoService>();
-builder.Services.AddScoped<TicketService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddSignalR();
 
 var app = builder.Build();
