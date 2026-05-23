@@ -133,14 +133,14 @@ if (!string.IsNullOrEmpty(supabaseUrl) && !string.IsNullOrEmpty(supabaseKey))
 }
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<TareaService>();
-builder.Services.AddScoped<PerfilUsuarioService>();
-builder.Services.AddScoped<RecordatorioService>();
-builder.Services.AddScoped<SesionEnfoqueService>();
+builder.Services.AddScoped<ITareaService, TareaService>();
+builder.Services.AddScoped<IPerfilUsuarioService, PerfilUsuarioService>();
+builder.Services.AddScoped<IRecordatorioService, RecordatorioService>();
+builder.Services.AddScoped<ISesionEnfoqueService, SesionEnfoqueService>();
 builder.Services.AddScoped<RegistroEmocionalService>();
 builder.Services.AddScoped<TransaccionService>();
-builder.Services.AddScoped<CuestionarioService>();
-builder.Services.AddScoped<PlanPersonalizadoService>();
+builder.Services.AddScoped<ICuestionarioService, CuestionarioService>();
+builder.Services.AddScoped<IPlanPersonalizadoService, PlanPersonalizadoService>();
 builder.Services.AddScoped<TicketService>();
 builder.Services.AddSignalR();
 
