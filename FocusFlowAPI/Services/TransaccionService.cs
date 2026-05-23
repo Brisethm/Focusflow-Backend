@@ -4,23 +4,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FocusFlowAPI.Services
 {
-    public class TransaccionService
+    public class TransaccionService : ITransaccionService
     {
         private readonly UsuarioContext _context;
         private readonly ILogger<TransaccionService> _logger;
 
         public TransaccionService(UsuarioContext context, ILogger<TransaccionService> logger)
         {
-            _context = context;
-            _logger = logger;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
+
         public async Task<IEnumerable<TransaccionDto>> ObtenerTransaccionesAsync(Guid idUsuario)
         {
             return await _context.Transacciones
                 .AsNoTracking()
                 .Where(t => t.IdUsuario == idUsuario)
                 .OrderByDescending(t => t.Fecha)
-                .Select(t => MapToDto(t))
+                .Select(t => new TransaccionDto
+                {
+                    IdTransaccion = t.IdTransaccion,
+                    Monto = t.Monto,
+                    Tipo = t.Tipo,
+                    Categoria = t.Categoria,
+                    Descripcion = t.Descripcion,
+                    Fecha = t.Fecha
+                })
                 .ToListAsync();
         }
 
@@ -30,8 +39,9 @@ namespace FocusFlowAPI.Services
                 .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.IdUsuario == idUsuario && t.IdTransaccion == idTransaccion);
 
-            return transaccion == null ? null : MapToDto(transaccion);
+            return transaccion is null ? null : MapToDto(transaccion);
         }
+
         public async Task<TransaccionDto> CrearTransaccionAsync(Guid idUsuario, TransaccionDto dto)
         {
             var transaccion = new Transaccion
@@ -62,8 +72,10 @@ namespace FocusFlowAPI.Services
                     .SetProperty(t => t.Descripcion, dto.Descripcion)
                 );
 
-            if (filas == 0)
+            if (filas is 0)
+            {
                 return null;
+            }
 
             _logger.LogInformation("[Transaccion] Transacción {IdTransaccion} actualizada correctamente.", idTransaccion);
 
@@ -73,7 +85,8 @@ namespace FocusFlowAPI.Services
                 Monto = dto.Monto,
                 Tipo = dto.Tipo,
                 Categoria = dto.Categoria,
-                Descripcion = dto.Descripcion
+                Descripcion = dto.Descripcion,
+                Fecha = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc)
             };
         }
 
@@ -85,9 +98,9 @@ namespace FocusFlowAPI.Services
 
             return filas > 0;
         }
-        private static TransaccionDto MapToDto(Transaccion transaccion)
-        {
-            return new TransaccionDto
+
+        private static TransaccionDto MapToDto(Transaccion transaccion) =>
+            new()
             {
                 IdTransaccion = transaccion.IdTransaccion,
                 Monto = transaccion.Monto,
@@ -96,6 +109,5 @@ namespace FocusFlowAPI.Services
                 Descripcion = transaccion.Descripcion,
                 Fecha = transaccion.Fecha
             };
-        }
     }
 }

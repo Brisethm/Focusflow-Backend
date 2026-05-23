@@ -137,7 +137,7 @@ builder.Services.AddScoped<ITareaService, TareaService>();
 builder.Services.AddScoped<IPerfilUsuarioService, PerfilUsuarioService>();
 builder.Services.AddScoped<IRecordatorioService, RecordatorioService>();
 builder.Services.AddScoped<ISesionEnfoqueService, SesionEnfoqueService>();
-builder.Services.AddScoped<RegistroEmocionalService>();
+builder.Services.AddScoped<IRegistroEmocionalService, RegistroEmocionalService>();
 builder.Services.AddScoped<TransaccionService>();
 builder.Services.AddScoped<ICuestionarioService, CuestionarioService>();
 builder.Services.AddScoped<IPlanPersonalizadoService, PlanPersonalizadoService>();
