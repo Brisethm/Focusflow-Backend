@@ -27,6 +27,13 @@ namespace FocusFlow.Tests.Services
         }
 
         [Fact]
+        public void Constructor_DeberiaLanzarArgumentNullException_CuandoParametrosSonNulos()
+        {
+            Assert.Throws<ArgumentNullException>(() => new PlanPersonalizadoService(null!, _mockLogger.Object));
+            Assert.Throws<ArgumentNullException>(() => new PlanPersonalizadoService(_context, null!));
+        }
+
+        [Fact]
         public async Task ObtenerPlanesAsync_DeberiaRetornarSoloPlanesDelUsuario()
         {
             // Arrange
@@ -44,6 +51,41 @@ namespace FocusFlow.Tests.Services
             // Assert
             Assert.Single(result);
             Assert.Equal(1, result.First().EnfoqueDiario);
+        }
+
+        [Fact]
+        public async Task ObtenerPlanPorIdAsync_DeberiaRetornarPlan_CuandoPerteneceAlUsuario()
+        {
+            var userId = Guid.NewGuid();
+            var plan = new PlanPersonalizado
+            {
+                IdUsuario = userId,
+                EnfoqueDiario = 2,
+                PausasDiarias = 1,
+                HoraDescanso = new TimeOnly(21, 30)
+            };
+            _context.PlanesPersonalizados.Add(plan);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.ObtenerPlanPorIdAsync(userId, plan.IdPlan);
+
+            Assert.NotNull(result);
+            Assert.Equal(plan.IdPlan, result!.IdPlan);
+            Assert.Equal(userId, result.IdUsuario);
+        }
+
+        [Fact]
+        public async Task ObtenerPlanPorIdAsync_DeberiaRetornarNull_CuandoNoPerteneceAlUsuario()
+        {
+            var ownerId = Guid.NewGuid();
+            var otherId = Guid.NewGuid();
+            var plan = new PlanPersonalizado { IdUsuario = ownerId, EnfoqueDiario = 2 };
+            _context.PlanesPersonalizados.Add(plan);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.ObtenerPlanPorIdAsync(otherId, plan.IdPlan);
+
+            Assert.Null(result);
         }
 
         [Fact]

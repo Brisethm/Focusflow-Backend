@@ -9,13 +9,13 @@ namespace FocusFlowAPI.Services
     public class AuthService : IAuthService
     {
         private readonly UsuarioContext _context;
-        private readonly Supabase.Client _supabase;
+        private readonly ISupabaseAuthClient _supabaseAuth;
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(UsuarioContext context, Supabase.Client supabase, ILogger<AuthService> logger)
+        public AuthService(UsuarioContext context, ISupabaseAuthClient supabaseAuth, ILogger<AuthService> logger)
         {
             _context = context;
-            _supabase = supabase;
+            _supabaseAuth = supabaseAuth;
             _logger = logger;
         }
 
@@ -32,7 +32,7 @@ namespace FocusFlowAPI.Services
                     }
                 };
 
-                var response = await _supabase.Auth.SignUp(dto.Email, dto.Password, signUpOptions);
+                var response = await _supabaseAuth.SignUpAsync(dto.Email, dto.Password, signUpOptions);
                 var session = ResolveSession(response);
 
                 if (response?.User?.Id == null || !Guid.TryParse(response.User.Id, out var userId))
@@ -77,7 +77,7 @@ namespace FocusFlowAPI.Services
         {
             try
             {
-                var response = await _supabase.Auth.SignIn(dto.Email, dto.Password);
+                var response = await _supabaseAuth.SignInAsync(dto.Email, dto.Password);
                 var session = ResolveSession(response);
 
                 if (response?.User?.Id == null)
@@ -99,15 +99,15 @@ namespace FocusFlowAPI.Services
 
         public async Task<bool> ResetPasswordAsync(string email)
         {
-            return await _supabase.Auth.ResetPasswordForEmail(email);
+            return await _supabaseAuth.ResetPasswordForEmailAsync(email);
         }
 
         public async Task<AuthResponse> UpdatePasswordAsync(string accessToken, string newPassword)
         {
             try
             {
-                await _supabase.Auth.SetSession(accessToken, accessToken);
-                var user = await _supabase.Auth.Update(new Supabase.Gotrue.UserAttributes
+                await _supabaseAuth.SetSessionAsync(accessToken, accessToken);
+                var user = await _supabaseAuth.UpdateAsync(new Supabase.Gotrue.UserAttributes
                 {
                     Password = newPassword
                 });
@@ -144,7 +144,7 @@ namespace FocusFlowAPI.Services
                     Data = new Dictionary<string, object> { { "nombre", dto.Nombre }, { "rol", dto.Rol.ToLower() } }
                 };
 
-                var response = await _supabase.Auth.SignUp(dto.Email, dto.Password, signUpOptions);
+                var response = await _supabaseAuth.SignUpAsync(dto.Email, dto.Password, signUpOptions);
 
                 if (response?.User?.Id == null || !Guid.TryParse(response.User.Id, out var newUserId))
                     return new AuthResponse { Success = false, StatusCode = 400, Message = "No se pudo registrar la cuenta en Supabase." };
@@ -187,7 +187,7 @@ namespace FocusFlowAPI.Services
 
         private Supabase.Gotrue.Session? ResolveSession(Supabase.Gotrue.Session? session)
         {
-            return session ?? _supabase.Auth.CurrentSession;
+            return session ?? _supabaseAuth.CurrentSession;
         }
     }
 }

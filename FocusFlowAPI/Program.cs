@@ -132,6 +132,7 @@ if (!string.IsNullOrEmpty(supabaseUrl) && !string.IsNullOrEmpty(supabaseKey))
 }
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISupabaseAuthClient, SupabaseAuthClient>();
 builder.Services.AddScoped<ITareaService, TareaService>();
 builder.Services.AddScoped<IPerfilUsuarioService, PerfilUsuarioService>();
 builder.Services.AddScoped<IRecordatorioService, RecordatorioService>();

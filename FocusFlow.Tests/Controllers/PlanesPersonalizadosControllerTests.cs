@@ -83,6 +83,40 @@ namespace FocusFlow.Tests.Controllers
         }
 
         [Fact]
+        public async Task GetPlan_DeberiaRetornarUnauthorized_CuandoNoHayUserId()
+        {
+            SetupUser(null);
+
+            var result = await _controller.GetPlan(1);
+
+            Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task GetPlan_DeberiaRetornarOk_CuandoPlanExiste()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            var plan = new PlanPersonalizadoDto { IdPlan = 1, EnfoqueDiario = 4 };
+            _mockService.Setup(s => s.ObtenerPlanPorIdAsync(userId, 1)).ReturnsAsync(plan);
+
+            var result = await _controller.GetPlan(1);
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(plan, ok.Value);
+        }
+
+        [Fact]
+        public async Task CrearPlan_DeberiaRetornarUnauthorized_CuandoNoHayUserId()
+        {
+            SetupUser(null);
+
+            var result = await _controller.CrearPlan(new CreatePlanDto());
+
+            Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        [Fact]
         public async Task CrearPlan_DeberiaRetornarCreated_CuandoEsExitoso()
         {
             // Arrange
@@ -100,6 +134,20 @@ namespace FocusFlow.Tests.Controllers
             Assert.Equal(201, createdResult.StatusCode);
             Assert.Equal(createdPlan.IdPlan, createdResult.RouteValues!["idPlan"]);
             Assert.Equal(createdPlan, createdResult.Value);
+        }
+
+        [Fact]
+        public async Task CrearPlan_DeberiaRetornarBadRequest_CuandoLanzaArgumentException()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            _mockService.Setup(s => s.CrearPlanAsync(userId, It.IsAny<CreatePlanDto>()))
+                .ThrowsAsync(new ArgumentException("Datos invalidos"));
+
+            var result = await _controller.CrearPlan(new CreatePlanDto());
+
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Datos invalidos", badRequest.Value);
         }
 
         [Fact]
@@ -121,6 +169,83 @@ namespace FocusFlow.Tests.Controllers
         }
 
         [Fact]
+        public async Task ActualizarPlan_DeberiaRetornarUnauthorized_CuandoNoHayUserId()
+        {
+            SetupUser(null);
+
+            var result = await _controller.ActualizarPlan(1, new CreatePlanDto());
+
+            Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task ActualizarPlan_DeberiaRetornarOk_CuandoServicioActualiza()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            var dto = new CreatePlanDto { EnfoqueDiario = 6 };
+            var plan = new PlanPersonalizadoDto { IdPlan = 1, EnfoqueDiario = 6 };
+            _mockService.Setup(s => s.ActualizarPlanAsync(userId, 1, dto)).ReturnsAsync(plan);
+
+            var result = await _controller.ActualizarPlan(1, dto);
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(plan, ok.Value);
+        }
+
+        [Fact]
+        public async Task ActualizarPlan_DeberiaRetornarNotFound_CuandoServicioRetornaNull()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            _mockService.Setup(s => s.ActualizarPlanAsync(userId, 1, It.IsAny<CreatePlanDto>()))
+                .ReturnsAsync((PlanPersonalizadoDto?)null);
+
+            var result = await _controller.ActualizarPlan(1, new CreatePlanDto());
+
+            Assert.IsType<NotFoundObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task ActualizarPlan_DeberiaRetornarBadRequest_CuandoLanzaArgumentException()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            _mockService.Setup(s => s.ActualizarPlanAsync(userId, 1, It.IsAny<CreatePlanDto>()))
+                .ThrowsAsync(new ArgumentException("Datos invalidos"));
+
+            var result = await _controller.ActualizarPlan(1, new CreatePlanDto());
+
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Datos invalidos", badRequest.Value);
+        }
+
+        [Fact]
+        public async Task ActualizarPlan_DeberiaRetornarConflict_CuandoLanzaInvalidOperationException()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            _mockService.Setup(s => s.ActualizarPlanAsync(userId, 1, It.IsAny<CreatePlanDto>()))
+                .ThrowsAsync(new InvalidOperationException("Conflicto"));
+
+            var result = await _controller.ActualizarPlan(1, new CreatePlanDto());
+
+            var conflict = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(StatusCodes.Status409Conflict, conflict.StatusCode);
+            Assert.Equal("Conflicto", conflict.Value);
+        }
+
+        [Fact]
+        public async Task EliminarPlan_DeberiaRetornarUnauthorized_CuandoNoHayUserId()
+        {
+            SetupUser(null);
+
+            var result = await _controller.EliminarPlan(1);
+
+            Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        [Fact]
         public async Task EliminarPlan_DeberiaRetornarNoContent_CuandoSeEliminaCorrectamente()
         {
             // Arrange
@@ -133,6 +258,18 @@ namespace FocusFlow.Tests.Controllers
 
             // Assert
             Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task EliminarPlan_DeberiaRetornarNotFound_CuandoNoExiste()
+        {
+            var userId = Guid.NewGuid();
+            SetupUser(userId);
+            _mockService.Setup(s => s.EliminarPlanAsync(userId, 1)).ReturnsAsync(false);
+
+            var result = await _controller.EliminarPlan(1);
+
+            Assert.IsType<NotFoundObjectResult>(result);
         }
     }
 }
