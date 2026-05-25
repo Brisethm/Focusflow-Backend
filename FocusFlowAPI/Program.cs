@@ -72,7 +72,7 @@ builder.Services.AddSingleton(jwksCache);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
-        policy => policy.WithOrigins("http://localhost:5173")
+        policy => policy.WithOrigins("http://localhost:5173", "https://focusflowfrontend-k5s9l26sn-brisethms-projects.vercel.app")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials());
